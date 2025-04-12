@@ -3,13 +3,23 @@ pragma solidity 0.8.22;
 
 interface ITypes {
     /**
-     * @notice Struct to store trigger information
+     * @notice Struct to store trigger output data
      * @param triggerId Unique identifier for the trigger
      * @param data Data associated with the triggerId
      */
     struct DataWithId {
         TriggerId triggerId;
         bytes data;
+    }
+
+    /**
+     * @notice Struct to store AVS output data
+     * @param root Root of the merkle tree
+     * @param ipfsHash IPFS hash of the merkle tree
+     */
+    struct AvsOutput {
+        bytes32 root;
+        bytes32 ipfsHash;
     }
 
     /**
