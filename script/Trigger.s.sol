@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.22;
+pragma solidity ^0.8.19;
 
 import {RewardsDistributor} from "contracts/RewardsDistributor.sol";
 import {ITypes} from "interfaces/ITypes.sol";
