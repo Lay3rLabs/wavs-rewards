@@ -5,6 +5,7 @@ import {stdJson} from "forge-std/StdJson.sol";
 import {Strings} from "@openzeppelin-contracts/utils/Strings.sol";
 import {IWavsServiceManager} from "@wavs/interfaces/IWavsServiceManager.sol";
 import {RewardsDistributor} from "contracts/RewardsDistributor.sol";
+import {RewardSourceERC721} from "contracts/RewardSourceERC721.sol";
 import {Common, EigenContracts} from "script/Common.s.sol";
 
 /// @dev Deployment script for RewardsDistributor contract
@@ -23,9 +24,17 @@ contract Deploy is Common {
      */
     function run(string calldata _serviceManagerAddr) public {
         vm.startBroadcast(_privateKey);
+
         RewardsDistributor rewardsDistributor = new RewardsDistributor(
             IWavsServiceManager(vm.parseAddress(_serviceManagerAddr))
         );
+
+        RewardSourceERC721 rewardSourceERC721 = new RewardSourceERC721();
+        // Mint 3 NFTs to the deployer.
+        rewardSourceERC721.mint(msg.sender, 1);
+        rewardSourceERC721.mint(msg.sender, 2);
+        rewardSourceERC721.mint(msg.sender, 3);
+
         vm.stopBroadcast();
 
         string memory _json = "json";
@@ -36,6 +45,10 @@ contract Deploy is Common {
         _json.serialize(
             "trigger",
             Strings.toHexString(address(rewardsDistributor))
+        );
+        _json.serialize(
+            "reward_source_nft",
+            Strings.toHexString(address(rewardSourceERC721))
         );
         string memory _finalJson = _json.serialize(
             "service_manager",

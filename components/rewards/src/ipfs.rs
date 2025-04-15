@@ -7,15 +7,11 @@ use std::{
 use wstd::http::{IntoBody, Request};
 use wstd::io::AsyncRead;
 
-use bs58;
 use cid::Cid;
 use multibase::decode;
 
 /// Uploads a file using multipart request to IPFS
-async fn upload_to_ipfs(file_path: &str, ipfs_url: &str) -> Result<Cid> {
-    let api_key = std::env::var("WAVS_ENV_LIGHTHOUSE_API_KEY")
-        .map_err(|e| anyhow::anyhow!("Failed to get API key: {}", e))?;
-
+async fn upload_to_ipfs(file_path: &str, ipfs_url: &str, api_key: &str) -> Result<Cid> {
     eprintln!("Uploading file to IPFS: {}", file_path);
 
     let mut file = File::open(file_path)?;
@@ -85,7 +81,7 @@ async fn upload_to_ipfs(file_path: &str, ipfs_url: &str) -> Result<Cid> {
 }
 
 /// Uploads JSON data directly to IPFS and returns the CID
-pub async fn upload_json_to_ipfs(json_data: &str, ipfs_url: &str) -> Result<Cid> {
+pub async fn upload_json_to_ipfs(json_data: &str, ipfs_url: &str, api_key: &str) -> Result<Cid> {
     // Create a temporary file to store the JSON data
     let temp_path = "/tmp/ipfs.json";
 
@@ -96,14 +92,14 @@ pub async fn upload_json_to_ipfs(json_data: &str, ipfs_url: &str) -> Result<Cid>
         .map_err(|e| anyhow::anyhow!("Failed to create /tmp directory: {}", e))?;
 
     // Write JSON to temporary file
-    let mut file = File::create(&temp_path)?;
+    let mut file = File::create(temp_path)?;
     file.write_all(json_data.as_bytes())?;
 
     // Upload the file
-    let hash = upload_to_ipfs(&temp_path, ipfs_url).await?;
+    let hash = upload_to_ipfs(temp_path, ipfs_url, api_key).await?;
 
     // Clean up the temporary file
-    delete_file(&temp_path)?;
+    delete_file(temp_path)?;
 
     // Return the IPFS URI
     Ok(hash)

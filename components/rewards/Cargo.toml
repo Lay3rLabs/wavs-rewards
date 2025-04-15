@@ -14,7 +14,12 @@ serde_json = { workspace = true }
 alloy-sol-macro = { workspace = true }
 wstd = { workspace = true }
 alloy-sol-types = { workspace = true }
+alloy-primitives = { workspace = true }
 anyhow = { workspace = true }
+async-trait = { workspace = true }
+alloy-network = { workspace = true }
+alloy-provider = { workspace = true }
+alloy-rpc-types = { workspace = true }
 
 merkle-tree-rs = "0.1.0"
 cid = "0.7"
