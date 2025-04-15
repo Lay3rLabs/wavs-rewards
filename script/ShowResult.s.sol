@@ -24,24 +24,48 @@ contract ShowResult is Common {
         );
 
         bytes memory data = rewardsDistributor.getData(triggerId);
-        console.log("Data:", string(data));
 
         ITypes.AvsOutput memory avsOutput = abi.decode(
             data,
             (ITypes.AvsOutput)
         );
-        console.log("AvsOutput.root:");
-        console.logBytes32(avsOutput.root);
-        console.log("AvsOutput.ipfsHash:");
-        console.logBytes32(avsOutput.ipfsHash);
 
         bytes32 root = rewardsDistributor.root();
-        console.log("Set root:");
-        console.logBytes32(root);
-
         bytes32 ipfsHash = rewardsDistributor.ipfsHash();
-        console.log("Set ipfsHash:");
-        console.logBytes32(ipfsHash);
+
+        if (root == avsOutput.root && ipfsHash == avsOutput.ipfsHash) {
+            console.log(
+                "Trigger executed successfully, root and ipfsHash match."
+            );
+            console.log("");
+            console.log("--------------------------------");
+            console.log("root:");
+            console.logBytes32(root);
+            console.log("");
+            console.log("ipfsHash:");
+            console.logBytes32(ipfsHash);
+            console.log("--------------------------------");
+        } else {
+            console.log("Trigger failed, root or ipfsHash mismatch");
+            console.log("");
+            console.log("--------------------------------");
+            console.log("");
+            console.log("contract root:");
+            console.logBytes32(root);
+            console.log("");
+            console.log("contract ipfsHash:");
+            console.logBytes32(ipfsHash);
+            console.log("");
+            console.log("--------------------------------");
+            console.log("");
+            console.log("avsOutput.root:");
+            console.logBytes32(avsOutput.root);
+            console.log("");
+            console.log("avsOutput.ipfsHash:");
+            console.logBytes32(avsOutput.ipfsHash);
+            console.log("");
+            console.log("--------------------------------");
+        }
 
         vm.stopBroadcast();
     }
