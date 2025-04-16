@@ -14,14 +14,15 @@ use super::Source;
 /// Compute rewards from an ERC721 token.
 pub struct Erc721Source {
     /// Contract address.
-    pub address: String,
+    pub address: Address,
     /// Rewards per token.
     pub rewards_per_token: U256,
 }
 
 impl Erc721Source {
-    pub fn new(address: impl Into<String>, rewards_per_token: U256) -> Self {
-        Self { address: address.into(), rewards_per_token }
+    pub fn new(address: &str, rewards_per_token: U256) -> Self {
+        let nft_contract = Address::from_str(address).unwrap();
+        Self { address: nft_contract, rewards_per_token }
     }
 }
 
@@ -33,27 +34,27 @@ impl Source for Erc721Source {
     }
 
     async fn get_rewards(&self, account: &str) -> Result<U256> {
-        let nft_contract = Address::from_str(&self.address).unwrap();
         let address = Address::from_str(account).unwrap();
-        let nft_balance = self.query_nft_ownership(address, nft_contract).await?;
+        let nft_balance = self.query_nft_ownership(address).await?;
         Ok(self.rewards_per_token * nft_balance)
     }
 }
 
 impl Erc721Source {
-    async fn query_nft_ownership(&self, owner: Address, nft_contract: Address) -> Result<U256> {
+    async fn query_nft_ownership(&self, owner: Address) -> Result<U256> {
         let chain_config = get_eth_chain_config("local").unwrap();
         let provider: RootProvider<Ethereum> =
             new_eth_provider::<Ethereum>(chain_config.http_endpoint.unwrap());
 
         let balance_call = IERC721::balanceOfCall { owner };
         let tx = alloy_rpc_types::eth::TransactionRequest {
-            to: Some(TxKind::Call(nft_contract)),
+            to: Some(TxKind::Call(self.address)),
             input: TransactionInput { input: Some(balance_call.abi_encode().into()), data: None },
             ..Default::default()
         };
 
         let result = provider.call(&tx).await?;
+
         Ok(U256::from_be_slice(&result))
     }
 }

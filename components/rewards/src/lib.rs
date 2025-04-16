@@ -35,7 +35,7 @@ impl Guest for Component {
         let mut registry = SourceRegistry::new();
         // Provide 1e18 rewards per NFT held.
         registry.add_source(sources::erc721::Erc721Source::new(
-            reward_source_nft_address,
+            &reward_source_nft_address,
             U256::from(1e18),
         ));
 

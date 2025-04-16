@@ -2,12 +2,19 @@
 pragma solidity ^0.8.19;
 
 import {RewardsDistributor} from "contracts/RewardsDistributor.sol";
+import {RewardSourceERC721} from "contracts/RewardSourceERC721.sol";
 import {ITypes} from "interfaces/ITypes.sol";
 import {Common} from "script/Common.s.sol";
 import {console} from "forge-std/console.sol";
+import {stdJson} from "forge-std/StdJson.sol";
 
 /// @dev Script to show the result of a trigger
 contract ShowResult is Common {
+    using stdJson for string;
+
+    string public script_output_path =
+        string.concat(vm.projectRoot(), "/.docker/script_deploy.json");
+
     function run(
         string calldata serviceTriggerAddr,
         string calldata //serviceHandlerAddr
