@@ -25,9 +25,9 @@ impl Guest for Component {
             .map_err(|e| format!("Failed to get reward token address: {}", e))?;
         let reward_source_nft_address = std::env::var("WAVS_ENV_REWARD_SOURCE_NFT_ADDRESS")
             .map_err(|e| format!("Failed to get NFT address: {}", e))?;
-        let ipfs_url = std::env::var("WAVS_ENV_LIGHTHOUSE_API_URL")
-            .unwrap_or_else(|_| "https://node.lighthouse.storage/api/v0/add".to_string());
-        let ipfs_api_key = std::env::var("WAVS_ENV_LIGHTHOUSE_API_KEY")
+        let ipfs_url = std::env::var("WAVS_ENV_PINATA_API_URL")
+            .unwrap_or_else(|_| "https://uploads.pinata.cloud/v3/files".to_string());
+        let ipfs_api_key = std::env::var("WAVS_ENV_PINATA_API_KEY")
             .map_err(|e| format!("Failed to get API key: {}", e))?;
 
         let (trigger_id, _req) = decode_trigger_event(action.data).map_err(|e| e.to_string())?;
@@ -96,9 +96,14 @@ impl Guest for Component {
 
             let ipfs_data_json = serde_json::to_string(&ipfs_data).map_err(|e| e.to_string())?;
 
-            let cid = ipfs::upload_json_to_ipfs(&ipfs_data_json, &ipfs_url, &ipfs_api_key)
-                .await
-                .map_err(|e| format!("Failed to upload IPFS: {}", e))?;
+            let cid = ipfs::upload_json_to_ipfs(
+                &ipfs_data_json,
+                &format!("rewards_{}.json", ipfs_data.root),
+                &ipfs_url,
+                &ipfs_api_key,
+            )
+            .await
+            .map_err(|e| format!("Failed to upload IPFS: {}", e))?;
 
             let ipfs_hash = cid.hash().digest();
 

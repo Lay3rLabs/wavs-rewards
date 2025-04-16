@@ -9,7 +9,7 @@ default: build
 # Customize these variables
 COMPONENT_FILENAME ?= rewards.wasm
 TRIGGER_EVENT ?= NewTrigger(bytes)
-SERVICE_CONFIG ?= '{"fuel_limit":100000000,"max_gas":5000000,"host_envs":["WAVS_ENV_REWARD_TOKEN_ADDRESS","WAVS_ENV_REWARD_SOURCE_NFT_ADDRESS","WAVS_ENV_LIGHTHOUSE_API_URL","WAVS_ENV_LIGHTHOUSE_API_KEY"],"kv":[],"workflow_id":"default","component_id":"default"}'
+SERVICE_CONFIG ?= '{"fuel_limit":100000000,"max_gas":5000000,"host_envs":["WAVS_ENV_REWARD_TOKEN_ADDRESS","WAVS_ENV_REWARD_SOURCE_NFT_ADDRESS","WAVS_ENV_PINATA_API_URL","WAVS_ENV_PINATA_API_KEY"],"kv":[],"workflow_id":"default","component_id":"default"}'
 
 # Define common variables
 CARGO?=cargo
