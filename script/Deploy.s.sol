@@ -7,6 +7,7 @@ import {Strings} from "@openzeppelin-contracts/utils/Strings.sol";
 import {IWavsServiceManager} from "@wavs/interfaces/IWavsServiceManager.sol";
 import {RewardsDistributor} from "contracts/RewardsDistributor.sol";
 import {RewardSourceERC721} from "contracts/RewardSourceERC721.sol";
+import {RewardERC20} from "contracts/RewardERC20.sol";
 import {Common, EigenContracts} from "script/Common.s.sol";
 
 /// @dev Deployment script for RewardsDistributor contract
@@ -26,10 +27,16 @@ contract Deploy is Common {
     function run(string calldata _serviceManagerAddr) public {
         vm.startBroadcast(_privateKey);
 
+        // Create the distributor which handles WAVS stuff.
         RewardsDistributor rewardsDistributor = new RewardsDistributor(
             IWavsServiceManager(vm.parseAddress(_serviceManagerAddr))
         );
 
+        // Mint reward tokens for the distributor.
+        RewardERC20 rewardERC20 = new RewardERC20();
+        rewardERC20.mint(address(rewardsDistributor), 1000e18);
+
+        // Create NFT that is used as source of rewards calculation.
         RewardSourceERC721 rewardSourceERC721 = new RewardSourceERC721();
         // Mint 3 NFTs to the deployer.
         address deployer = vm.addr(_privateKey);
@@ -47,6 +54,10 @@ contract Deploy is Common {
         _json.serialize(
             "trigger",
             Strings.toHexString(address(rewardsDistributor))
+        );
+        _json.serialize(
+            "reward_token",
+            Strings.toHexString(address(rewardERC20))
         );
         _json.serialize(
             "reward_source_nft",

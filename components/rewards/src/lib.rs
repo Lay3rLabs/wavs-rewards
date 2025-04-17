@@ -111,7 +111,8 @@ impl Guest for Component {
                 trigger_id,
                 solidity::AvsOutput {
                     root: serde_json::from_value(root_bytes.into()).unwrap(),
-                    ipfsHash: serde_json::from_value(ipfs_hash.into()).unwrap(),
+                    ipfsHashData: serde_json::from_value(ipfs_hash.into()).unwrap(),
+                    ipfsHash: cid.to_string(),
                 },
             );
 

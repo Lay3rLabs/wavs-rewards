@@ -19,7 +19,8 @@ interface ITypes {
      */
     struct AvsOutput {
         bytes32 root;
-        bytes32 ipfsHash;
+        bytes32 ipfsHashData;
+        string ipfsHash;
     }
 
     /**

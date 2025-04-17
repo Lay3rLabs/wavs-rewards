@@ -104,7 +104,7 @@ contract RewardsDistributor is
             (ITypes.AvsOutput)
         );
 
-        _setRoot(avsOutput.root, avsOutput.ipfsHash);
+        _setRoot(avsOutput.root, avsOutput.ipfsHashData);
     }
 
     /// @inheritdoc ISimpleSubmit
