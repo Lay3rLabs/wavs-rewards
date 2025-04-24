@@ -44,13 +44,19 @@ contract RewardsDistributor is
     }
 
     /// @inheritdoc ISimpleTrigger
-    function addTrigger(bytes memory _data) external {
+    function addTrigger(
+        address rewardTokenAddr,
+        address rewardSourceNftAddr
+    ) external {
         // Get the next trigger id
         nextTriggerId = TriggerId.wrap(TriggerId.unwrap(nextTriggerId) + 1);
         TriggerId _triggerId = nextTriggerId;
 
         // Create the trigger
-        Trigger memory _trigger = Trigger({creator: msg.sender, data: _data});
+        Trigger memory _trigger = Trigger({
+            creator: msg.sender,
+            data: abi.encodePacked(rewardTokenAddr, rewardSourceNftAddr)
+        });
 
         // Update storages
         triggersById[_triggerId] = _trigger;
@@ -62,7 +68,11 @@ contract RewardsDistributor is
             data: _trigger.data
         });
 
-        emit NewTrigger(abi.encode(_triggerInfo));
+        emit WavsRewardsTrigger(
+            TriggerId.unwrap(_triggerId),
+            rewardTokenAddr,
+            rewardSourceNftAddr
+        );
     }
 
     /// @inheritdoc ISimpleTrigger

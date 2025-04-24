@@ -21,16 +21,17 @@ export!(Component with_types_in bindings);
 
 impl Guest for Component {
     fn run(action: TriggerAction) -> std::result::Result<Option<Vec<u8>>, String> {
-        let reward_token_address = std::env::var("WAVS_ENV_REWARD_TOKEN_ADDRESS")
-            .map_err(|e| format!("Failed to get reward token address: {}", e))?;
-        let reward_source_nft_address = std::env::var("WAVS_ENV_REWARD_SOURCE_NFT_ADDRESS")
-            .map_err(|e| format!("Failed to get NFT address: {}", e))?;
+        // let reward_token_address = std::env::var("WAVS_ENV_REWARD_TOKEN_ADDRESS")
+        //     .map_err(|e| format!("Failed to get reward token address: {}", e))?;
+        // let reward_source_nft_address = std::env::var("WAVS_ENV_REWARD_SOURCE_NFT_ADDRESS")
+        //     .map_err(|e| format!("Failed to get NFT address: {}", e))?;
         let ipfs_url = std::env::var("WAVS_ENV_PINATA_API_URL")
             .unwrap_or_else(|_| "https://uploads.pinata.cloud/v3/files".to_string());
         let ipfs_api_key = std::env::var("WAVS_ENV_PINATA_API_KEY")
             .map_err(|e| format!("Failed to get API key: {}", e))?;
 
-        let (trigger_id, _req) = decode_trigger_event(action.data).map_err(|e| e.to_string())?;
+        let (trigger_id, reward_token_address, reward_source_nft_address) =
+            decode_trigger_event(action.data).map_err(|e| e.to_string())?;
 
         let mut registry = SourceRegistry::new();
         // Provide 1e18 rewards per NFT held.

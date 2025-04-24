@@ -190,7 +190,7 @@ forge script ./script/Deploy.s.sol ${SERVICE_MANAGER_ADDR} --sig "run(string)" -
 Deploy the compiled component with the contracts from the previous steps. Review the [makefile](./Makefile) for more details and configuration options.`TRIGGER_EVENT` is the event that the trigger contract emits and WAVS watches for. By altering `SERVICE_TRIGGER_ADDR` you can watch events for contracts others have deployed.
 
 ```bash
-TRIGGER_EVENT="NewTrigger(bytes)" make deploy-service
+TRIGGER_EVENT="WavsRewardsTrigger(uint64,address,address)" make deploy-service
 ```
 
 #### Trigger the Service
@@ -199,7 +199,7 @@ Anyone can now call the [trigger contract](./src/contracts/WavsTrigger.sol) whic
 
 ```bash
 export SERVICE_TRIGGER_ADDR=`make get-trigger-from-deploy`
-forge script ./script/Trigger.s.sol ${SERVICE_TRIGGER_ADDR} "test" --sig "run(string,string)" --rpc-url http://localhost:8545 --broadcast -v 4
+forge script ./script/Trigger.s.sol ${SERVICE_TRIGGER_ADDR} $WAVS_ENV_REWARD_TOKEN_ADDRESS $WAVS_ENV_REWARD_SOURCE_NFT_ADDRESS --sig "run(string,string,string)" --rpc-url http://localhost:8545 --broadcast -v 4
 ```
 
 #### Show the result

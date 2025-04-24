@@ -10,14 +10,18 @@ import {console} from "forge-std/console.sol";
 contract Trigger is Common {
     function run(
         string calldata serviceTriggerAddr,
-        string calldata inputData
+        string calldata rewardTokenAddr,
+        string calldata rewardSourceNftAddr
     ) public {
         vm.startBroadcast(_privateKey);
         RewardsDistributor rewardsDistributor = RewardsDistributor(
             vm.parseAddress(serviceTriggerAddr)
         );
 
-        rewardsDistributor.addTrigger(abi.encodePacked(inputData));
+        rewardsDistributor.addTrigger(
+            vm.parseAddress(rewardTokenAddr),
+            vm.parseAddress(rewardSourceNftAddr)
+        );
         ITypes.TriggerId triggerId = rewardsDistributor.nextTriggerId();
         console.log("TriggerId", ITypes.TriggerId.unwrap(triggerId));
         vm.stopBroadcast();

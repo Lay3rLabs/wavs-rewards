@@ -95,7 +95,7 @@ jobs:
         export SERVICE_MANAGER_ADDR=`make get-eigen-service-manager-from-deploy`
         forge script ./script/Deploy.s.sol ${SERVICE_MANAGER_ADDR} --sig "run(string)" --rpc-url http://localhost:8545 --broadcast
         sleep 2
-        TRIGGER_EVENT="NewTrigger(bytes)" make deploy-service
+        TRIGGER_EVENT="WavsRewardsTrigger(uint64,address,address)" make deploy-service
         sleep 2
         export COIN_MARKET_CAP_ID=1
         export SERVICE_TRIGGER_ADDR=`make get-trigger-from-deploy`

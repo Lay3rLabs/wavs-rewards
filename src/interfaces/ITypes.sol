@@ -37,9 +37,15 @@ interface ITypes {
 
     /**
      * @notice Event emitted when a new trigger is created
-     * @param _triggerInfo Encoded TriggerInfo struct
+     * @param triggerId Unique identifier for the trigger
+     * @param rewardTokenAddr Address of the reward token
+     * @param rewardSourceNftAddr Address of the reward source NFT
      */
-    event NewTrigger(bytes _triggerInfo);
+    event WavsRewardsTrigger(
+        uint64 triggerId,
+        address rewardTokenAddr,
+        address rewardSourceNftAddr
+    );
 
     /// @notice TriggerId is a unique identifier for a trigger
     type TriggerId is uint64;
