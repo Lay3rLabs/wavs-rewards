@@ -2,7 +2,7 @@
 
 **Template for getting started with developing WAVS applications**
 
-A template for developing WebAssembly AVS applications using Rust and Solidity, configured for Windows *WSL*, Linux, and MacOS. The sample oracle service fetches the current price of a cryptocurrency from [CoinMarketCap](https://coinmarketcap.com) and saves it on chain.
+A template for developing WebAssembly AVS applications using Rust and Solidity, configured for Windows _WSL_, Linux, and MacOS. The sample oracle service fetches the current price of a cryptocurrency from [CoinMarketCap](https://coinmarketcap.com) and saves it on chain.
 
 ## System Requirements
 
@@ -10,27 +10,32 @@ A template for developing WebAssembly AVS applications using Rust and Solidity, 
 <summary>Core (Docker, Compose, Make, JQ, Node v21+)</summary>
 
 ### Docker
+
 - **MacOS**: `brew install --cask docker`
 - **Linux**: `sudo apt -y install docker.io`
 - **Windows WSL**: [docker desktop wsl](https://docs.docker.com/desktop/wsl/#turn-on-docker-desktop-wsl-2) & `sudo chmod 666 /var/run/docker.sock`
 - [Docker Documentation](https://docs.docker.com/get-started/get-docker/)
 
 ### Docker Compose
+
 - **MacOS**: Already installed with Docker installer
 - **Linux + Windows WSL**: `sudo apt-get install docker-compose-v2`
 - [Compose Documentation](https://docs.docker.com/compose/)
 
 ### Make
+
 - **MacOS**: `brew install make`
 - **Linux + Windows WSL**: `sudo apt -y install make`
 - [Make Documentation](https://www.gnu.org/software/make/manual/make.html)
 
 ### JQ
+
 - **MacOS**: `brew install jq`
 - **Linux + Windows WSL**: `sudo apt -y install jq`
 - [JQ Documentation](https://jqlang.org/download/)
 
 ### Node.js
+
 - **Required Version**: v21+
 - [Installation via NVM](https://github.com/nvm-sh/nvm?tab=readme-ov-file#installing-and-updating)
 </details>
@@ -134,10 +139,12 @@ COIN_MARKET_CAP_ID=1 make wasi-exec
 
 > [!NOTE]
 > If you are running on a Mac with an ARM chip, you will need to do the following:
+>
 > - Set up Rosetta: `softwareupdate --install-rosetta`
 > - Enable Rosetta (Docker Desktop: Settings -> General -> enable "Use Rosetta for x86_64/amd64 emulation on Apple Silicon")
 >
 > Configure one of the following networking:
+>
 > - Docker Desktop: Settings -> Resources -> Network -> 'Enable Host Networking'
 > - `brew install chipmk/tap/docker-mac-net-connect && sudo brew services start chipmk/tap/docker-mac-net-connect`
 
@@ -155,7 +162,17 @@ cp .env.example .env
 make start-all
 ```
 
-### Deploy Contract
+Set `WAVS_ENV_PINATA_API_KEY` and `FOUNDRY_IPFS_GATEWAY_URL` in your `.env` file. The other variables will be set automatically by the ./rune2e.sh script.
+
+### Run the rune2e.sh script
+
+```bash
+./rune2e.sh
+```
+
+This script automates contract deployment, environment variable setup, service deployment, trigger, and result retrieval. Each of the steps are also available as separate commands, shown below.
+
+#### Deploy Contract
 
 Upload your service's trigger and submission contracts. The trigger contract is where WAVS will watch for events, and the submission contract is where the AVS service operator will submit the result on chain.
 
@@ -168,7 +185,7 @@ forge script ./script/Deploy.s.sol ${SERVICE_MANAGER_ADDR} --sig "run(string)" -
 > You can see the deployed trigger address with `make get-trigger-from-deploy`
 > and the deployed submission address with `make get-service-handler-from-deploy`
 
-## Deploy Service
+#### Deploy Service
 
 Deploy the compiled component with the contracts from the previous steps. Review the [makefile](./Makefile) for more details and configuration options.`TRIGGER_EVENT` is the event that the trigger contract emits and WAVS watches for. By altering `SERVICE_TRIGGER_ADDR` you can watch events for contracts others have deployed.
 
@@ -176,7 +193,7 @@ Deploy the compiled component with the contracts from the previous steps. Review
 TRIGGER_EVENT="NewTrigger(bytes)" make deploy-service
 ```
 
-## Trigger the Service
+#### Trigger the Service
 
 Anyone can now call the [trigger contract](./src/contracts/WavsTrigger.sol) which emits the trigger event WAVS is watching for from the previous step. WAVS then calls the service and saves the result on-chain.
 
@@ -185,7 +202,7 @@ export SERVICE_TRIGGER_ADDR=`make get-trigger-from-deploy`
 forge script ./script/Trigger.s.sol ${SERVICE_TRIGGER_ADDR} "test" --sig "run(string,string)" --rpc-url http://localhost:8545 --broadcast -v 4
 ```
 
-## Show the result
+#### Show the result
 
 Query the latest submission contract id from the previous request made.
 
