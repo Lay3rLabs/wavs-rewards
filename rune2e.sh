@@ -8,13 +8,9 @@ forge script ./script/Deploy.s.sol ${SERVICE_MANAGER_ADDR} --sig "run(string)" -
 
 # Extract the reward token address from the deploy
 export WAVS_ENV_REWARD_TOKEN_ADDRESS=`jq -r '.reward_token' .docker/script_deploy.json`
-# Replace line in .env
-sed -i '' "s/WAVS_ENV_REWARD_TOKEN_ADDRESS=.*/WAVS_ENV_REWARD_TOKEN_ADDRESS=${WAVS_ENV_REWARD_TOKEN_ADDRESS}/" .env
 
 # Extract the NFT address from the deploy
 export WAVS_ENV_REWARD_SOURCE_NFT_ADDRESS=`jq -r '.reward_source_nft' .docker/script_deploy.json`
-# Replace line in .env
-sed -i '' "s/WAVS_ENV_REWARD_SOURCE_NFT_ADDRESS=.*/WAVS_ENV_REWARD_SOURCE_NFT_ADDRESS=${WAVS_ENV_REWARD_SOURCE_NFT_ADDRESS}/" .env
 
 TRIGGER_EVENT="WavsRewardsTrigger(uint64,address,address)" make deploy-service
 export SERVICE_TRIGGER_ADDR=`make get-trigger-from-deploy`

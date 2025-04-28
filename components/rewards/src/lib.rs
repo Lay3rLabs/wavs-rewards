@@ -41,7 +41,7 @@ impl Guest for Component {
         ));
 
         block_on(async move {
-            let accounts = registry.get_accounts().map_err(|e| e.to_string())?;
+            let accounts = registry.get_accounts().await.map_err(|e| e.to_string())?;
 
             // each value is [address, token, amount]
             let values = accounts
@@ -73,12 +73,16 @@ impl Guest for Component {
             let root = tree.root();
             let root_bytes = hex::decode(&root).map_err(|e| e.to_string())?;
 
+            let sources_with_metadata =
+                registry.get_sources_with_metadata().await.map_err(|e| e.to_string())?;
+
             let mut ipfs_data = MerkleTreeIpfsData {
                 id: root.clone(),
                 metadata: json!({
                     "num_accounts": results.len(),
-                    "token_address": reward_token_address,
+                    "reward_token_address": reward_token_address,
                     "total_rewards": total_rewards,
+                    "sources": sources_with_metadata,
                 }),
                 root: root.clone(),
                 tree: vec![],

@@ -1,8 +1,6 @@
-# [WAVS](https://docs.wavs.xyz) Monorepo Template
+# [WAVS](https://docs.wavs.xyz) Rewards Demo
 
-**Template for getting started with developing WAVS applications**
-
-A template for developing WebAssembly AVS applications using Rust and Solidity, configured for Windows _WSL_, Linux, and MacOS. The sample oracle service fetches the current price of a cryptocurrency from [CoinMarketCap](https://coinmarketcap.com) and saves it on chain.
+This project implements a reward distribution system that computes rewards based on NFT holdings, creates a Merkle tree, uploads it to IPFS, and allows users to claim rewards via a frontend interface. There is also a frontend to interact with the demo.
 
 ## System Requirements
 
@@ -84,15 +82,31 @@ wkg config --default-registry wa.dev
 
 </details>
 
-## Create Project
+## Project Overview
 
-```bash
-# If you don't have foundry: `curl -L https://foundry.paradigm.xyz | bash && $HOME/.foundry/bin/foundryup`
-forge init --template Lay3rLabs/wavs-foundry-template my-wavs --branch 0.3
-```
+This project demonstrates a complete web3 reward distribution system with the following components:
 
-> [!TIP]
-> Run `make help` to see all available commands and environment variable overrides.
+1. **Solidity Smart Contracts**:
+
+   - `RewardsDistributor.sol`: Main contract for distributing rewards based on Merkle proofs
+   - `RewardERC20.sol`: ERC20 token used for rewards
+   - `RewardSourceERC721.sol`: NFT contract that determines reward eligibility
+
+2. **AVS Component (Rust)**:
+
+   - Computes rewards based on NFT ownership
+   - Builds a Merkle tree of account→reward mappings
+   - Uploads the Merkle tree data to IPFS
+   - Returns the Merkle root and IPFS hash to the contract
+
+3. **Frontend**:
+   - Displays pending rewards
+   - Allows users to claim rewards by submitting Merkle proofs
+   - Shows claim history and total received rewards
+   - Breaks down rewards by source
+   - Allows to mint NFTs and trigger the AVS service to update the merkle root in the reward distributor contract
+
+## Installation and Setup
 
 ### Solidity
 
@@ -127,14 +141,6 @@ Now build the WASI rust components into the `compiled` output directory.
 make wasi-build # or `make build` to include solidity compilation.
 ```
 
-<!-- ### Execute WASI component directly
-
-Test run the component locally to validate the business logic works. An ID of 1 is Bitcoin. Nothing will be saved on-chain, just the output of the component is shown.
-
-```bash
-COIN_MARKET_CAP_ID=1 make wasi-exec
-``` -->
-
 ## WAVS
 
 > [!NOTE]
@@ -162,7 +168,7 @@ cp .env.example .env
 make start-all
 ```
 
-Set `WAVS_ENV_PINATA_API_KEY` and `FOUNDRY_IPFS_GATEWAY_URL` in your `.env` file. The other variables will be set automatically by the ./rune2e.sh script.
+Set `WAVS_ENV_PINATA_API_KEY` and `IPFS_GATEWAY_URL` in your `.env` file. The other variables will be set automatically by the ./rune2e.sh script.
 
 ### Run the rune2e.sh script
 
@@ -172,41 +178,50 @@ Set `WAVS_ENV_PINATA_API_KEY` and `FOUNDRY_IPFS_GATEWAY_URL` in your `.env` file
 
 This script automates contract deployment, environment variable setup, service deployment, trigger, and result retrieval. Each of the steps are also available as separate commands, shown below.
 
-#### Deploy Contract
+## Frontend
 
-Upload your service's trigger and submission contracts. The trigger contract is where WAVS will watch for events, and the submission contract is where the AVS service operator will submit the result on chain.
+A frontend application is included for interacting with the reward distribution system.
 
-```bash
-export SERVICE_MANAGER_ADDR=`make get-eigen-service-manager-from-deploy`
-forge script ./script/Deploy.s.sol ${SERVICE_MANAGER_ADDR} --sig "run(string)" --rpc-url http://localhost:8545 --broadcast
-```
+### Features
 
-> [!TIP]
-> You can see the deployed trigger address with `make get-trigger-from-deploy`
-> and the deployed submission address with `make get-service-handler-from-deploy`
+- Connect your Ethereum wallet
+- View pending rewards based on NFT holdings
+- Claim rewards by submitting your Merkle proof
+- View claim history and total rewards received
+- See a breakdown of reward sources
+- Use admin panel to mint NFTs and trigger the AVS service to update the merkle root in the reward distributor contract
 
-#### Deploy Service
+### Running the Frontend
 
-Deploy the compiled component with the contracts from the previous steps. Review the [makefile](./Makefile) for more details and configuration options.`TRIGGER_EVENT` is the event that the trigger contract emits and WAVS watches for. By altering `SERVICE_TRIGGER_ADDR` you can watch events for contracts others have deployed.
-
-```bash
-TRIGGER_EVENT="WavsRewardsTrigger(uint64,address,address)" make deploy-service
-```
-
-#### Trigger the Service
-
-Anyone can now call the [trigger contract](./src/contracts/WavsTrigger.sol) which emits the trigger event WAVS is watching for from the previous step. WAVS then calls the service and saves the result on-chain.
+The frontend must be started after the backend is running and the contracts are deployed, since the environment variables are set by the rune2e.sh script and need to be available to the frontend.
 
 ```bash
-export SERVICE_TRIGGER_ADDR=`make get-trigger-from-deploy`
-forge script ./script/Trigger.s.sol ${SERVICE_TRIGGER_ADDR} $WAVS_ENV_REWARD_TOKEN_ADDRESS $WAVS_ENV_REWARD_SOURCE_NFT_ADDRESS --sig "run(string,string,string)" --rpc-url http://localhost:8545 --broadcast -v 4
+# In a terminal, start the backend
+make start-all
+
+# In another terminal, deploy the necessary contracts and do a test run.
+./rune2e.sh
+
+# Then install frontend dependencies
+cd frontend
+npm install
+
+# And start the server
+npm run dev
+
+# Frontend will be available at http://localhost:3000
 ```
 
-#### Show the result
+To test the reward system, follow these steps:
 
-Query the latest submission contract id from the previous request made.
+1. In the admin panel:
 
-```bash
-# Get the latest TriggerId and show the result via `script/ShowResult.s.sol`
-make show-result
-```
+   - Tap the faucet to get local tokens to pay for gas
+   - Mint NFTs to your wallet
+   - Trigger AVS to run to recompute the merkle root, upload it to IPFS, and update the contract.
+
+2. Go to the home page:
+   - See pending rewards based on your NFT holdings
+   - Hit claim and see it in the history
+   - See a breakdown of reward sources
+   - Debug raw merkle tree data

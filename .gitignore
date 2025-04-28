@@ -5,5 +5,7 @@ broadcast/
 compiled/*.wasm
 .docker/*.json
 .env
+.env.local
 node_modules/
 lcov.info
+.next/

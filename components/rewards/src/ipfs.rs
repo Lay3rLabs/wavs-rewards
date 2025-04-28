@@ -8,7 +8,7 @@ use wstd::http::{IntoBody, Request};
 use wstd::io::AsyncRead;
 
 use cid::Cid;
-use multibase::decode;
+use std::str::FromStr;
 
 /// Uploads a file using multipart request to IPFS
 async fn upload_to_ipfs(file_path: &str, name: &str, ipfs_url: &str, api_key: &str) -> Result<Cid> {
@@ -138,11 +138,8 @@ pub fn decode_ipfs_cid(cid_str: &str) -> Result<Cid, String> {
         let cid = Cid::try_from(decoded).map_err(|e| e.to_string())?;
         Ok(cid)
     } else {
-        // Handle v1 and other CIDs with multibase decoding
-        let (_base, decoded) = decode(cid_str).map_err(|e| e.to_string())?;
-
         // Attempt to construct a Cid from the decoded bytes
-        let cid = Cid::try_from(decoded).map_err(|e| e.to_string())?;
+        let cid = Cid::from_str(cid_str).map_err(|e| e.to_string())?;
         Ok(cid)
     }
 }

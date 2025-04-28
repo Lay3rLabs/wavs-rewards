@@ -9,11 +9,17 @@ pub mod erc721;
 /// A source of rewards.
 #[async_trait(?Send)]
 pub trait Source {
+    /// Get the name of the source.
+    fn get_name(&self) -> &str;
+
     /// Get all accounts that have rewards from this source.
-    fn get_accounts(&self) -> Result<Vec<String>>;
+    async fn get_accounts(&self) -> Result<Vec<String>>;
 
     /// Get the rewards for an account.
     async fn get_rewards(&self, account: &str) -> Result<U256>;
+
+    /// Get metadata about the source.
+    async fn get_metadata(&self) -> Result<serde_json::Value>;
 }
 
 /// A registry that manages multiple reward sources.
@@ -33,10 +39,10 @@ impl SourceRegistry {
     }
 
     /// Get aggregated accounts from all sources (deduplicated).
-    pub fn get_accounts(&self) -> Result<Vec<String>> {
+    pub async fn get_accounts(&self) -> Result<Vec<String>> {
         let mut accounts = HashSet::new();
         for source in &self.sources {
-            accounts.extend(source.get_accounts()?);
+            accounts.extend(source.get_accounts().await?);
         }
         Ok(accounts.into_iter().collect())
     }
@@ -53,5 +59,19 @@ impl SourceRegistry {
         }
 
         Ok(total)
+    }
+
+    /// Get metadata about all sources.
+    pub async fn get_sources_with_metadata(&self) -> Result<Vec<serde_json::Value>> {
+        let mut metadata = Vec::new();
+        for source in &self.sources {
+            let name = source.get_name();
+            let source_metadata = source.get_metadata().await?;
+            metadata.push(serde_json::json!({
+                "name": name,
+                "metadata": source_metadata,
+            }));
+        }
+        Ok(metadata)
     }
 }

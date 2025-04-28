@@ -81,8 +81,8 @@ contract ShowResult is Common {
             console.log("");
         }
 
-        // access FOUNDRY_IPFS_GATEWAY_URL from env
-        string memory ipfsGatewayUrl = vm.envString("FOUNDRY_IPFS_GATEWAY_URL");
+        // access IPFS_GATEWAY_URL from env
+        string memory ipfsGatewayUrl = vm.envString("IPFS_GATEWAY_URL");
         string memory url = string.concat(ipfsGatewayUrl, avsOutput.ipfsHash);
 
         console.log("Merkle data URL: ", url);
