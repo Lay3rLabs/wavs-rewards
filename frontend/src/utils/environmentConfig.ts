@@ -5,7 +5,7 @@
  */
 
 // Contract addresses
-export const getRewardsDistributorAddress = (): `0x${string}` => {
+export const getRewardDistributorAddress = (): `0x${string}` => {
   const address = process.env.NEXT_PUBLIC_REWARD_DISTRIBUTOR_ADDRESS;
   if (!address) {
     throw new Error(

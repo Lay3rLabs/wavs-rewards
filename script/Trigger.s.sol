@@ -1,28 +1,30 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import {RewardsDistributor} from "contracts/RewardsDistributor.sol";
-import {ITypes} from "interfaces/ITypes.sol";
-import {Common} from "script/Common.s.sol";
 import {console} from "forge-std/console.sol";
 
+import {Common} from "script/Common.s.sol";
+
+import {RewardDistributor} from "contracts/RewardDistributor.sol";
+import {ITypes} from "interfaces/ITypes.sol";
+
 /// @dev Script to add a new trigger
-contract Trigger is Common {
+contract TriggerScript is Common {
     function run(
-        string calldata serviceTriggerAddr,
+        string calldata rewardDistributorAddr,
         string calldata rewardTokenAddr,
         string calldata rewardSourceNftAddr
     ) public {
         vm.startBroadcast(_privateKey);
-        RewardsDistributor rewardsDistributor = RewardsDistributor(
-            vm.parseAddress(serviceTriggerAddr)
+        RewardDistributor rewardDistributor = RewardDistributor(
+            vm.parseAddress(rewardDistributorAddr)
         );
 
-        rewardsDistributor.addTrigger(
+        rewardDistributor.addTrigger(
             vm.parseAddress(rewardTokenAddr),
             vm.parseAddress(rewardSourceNftAddr)
         );
-        ITypes.TriggerId triggerId = rewardsDistributor.nextTriggerId();
+        ITypes.TriggerId triggerId = rewardDistributor.nextTriggerId();
         console.log("TriggerId", ITypes.TriggerId.unwrap(triggerId));
         vm.stopBroadcast();
     }

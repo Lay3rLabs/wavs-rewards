@@ -88,7 +88,7 @@ This project demonstrates a complete web3 reward distribution system with the fo
 
 1. **Solidity Smart Contracts**:
 
-   - `RewardsDistributor.sol`: Main contract for distributing rewards based on Merkle proofs
+   - `RewardDistributor.sol`: Main contract for distributing rewards based on Merkle proofs
    - `RewardERC20.sol`: ERC20 token used for rewards
    - `RewardSourceERC721.sol`: NFT contract that determines reward eligibility
 
@@ -168,15 +168,27 @@ cp .env.example .env
 make start-all
 ```
 
-Set `WAVS_ENV_PINATA_API_KEY` and `IPFS_GATEWAY_URL` in your `.env` file. The other variables will be set automatically by the ./rune2e.sh script.
+Set `WAVS_ENV_PINATA_API_KEY` and `IPFS_GATEWAY_URL` in your `.env` file.
 
-### Run the rune2e.sh script
+### Run the demo
 
 ```bash
-./rune2e.sh
-```
+# Deploy contracts
+make deploy-contracts
 
-This script automates contract deployment, environment variable setup, service deployment, trigger, and result retrieval. Each of the steps are also available as separate commands, shown below.
+# Deploy the service
+make deploy-service
+
+# Trigger the service
+make trigger-service
+
+# Wait for the component to execute
+echo "waiting 3 seconds for the component to execute..."
+sleep 3
+
+# Claim the rewards
+make claim
+```
 
 ## Frontend
 
@@ -193,14 +205,18 @@ A frontend application is included for interacting with the reward distribution 
 
 ### Running the Frontend
 
-The frontend must be started after the backend is running and the contracts are deployed, since the environment variables are set by the rune2e.sh script and need to be available to the frontend.
+The frontend must be started after the backend is running and the contracts are deployed, since the contracts need to be available to the frontend via environment variables.
 
 ```bash
 # In a terminal, start the backend
 make start-all
 
-# In another terminal, deploy the necessary contracts and do a test run.
-./rune2e.sh
+# In another terminal, deploy the necessary contracts and service and do a test run.
+make deploy-contracts
+make deploy-service
+make trigger-service
+sleep 3
+make claim
 
 # Then install frontend dependencies
 cd frontend

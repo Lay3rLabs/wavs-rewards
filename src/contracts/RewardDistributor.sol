@@ -8,7 +8,7 @@ import {IWavsServiceManager} from "@wavs/interfaces/IWavsServiceManager.sol";
 import {IWavsServiceHandler} from "@wavs/interfaces/IWavsServiceHandler.sol";
 import {UniversalRewardsDistributor} from "@morpho-org/universal-rewards-distributor/UniversalRewardsDistributor.sol";
 
-contract RewardsDistributor is
+contract RewardDistributor is
     ISimpleTrigger,
     ISimpleSubmit,
     IWavsServiceHandler,
@@ -61,12 +61,6 @@ contract RewardsDistributor is
         // Update storages
         triggersById[_triggerId] = _trigger;
         _triggerIdsByCreator[msg.sender].push(_triggerId);
-
-        TriggerInfo memory _triggerInfo = TriggerInfo({
-            triggerId: _triggerId,
-            creator: _trigger.creator,
-            data: _trigger.data
-        });
 
         emit WavsRewardsTrigger(
             TriggerId.unwrap(_triggerId),

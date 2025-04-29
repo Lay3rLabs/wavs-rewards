@@ -50,7 +50,7 @@ function loadAndTransformEnv() {
     
     // Transform the variables according to the mapping
     const transformedVars = {
-      'NEXT_PUBLIC_REWARD_DISTRIBUTOR_ADDRESS': deployConfig.service_handler,
+      'NEXT_PUBLIC_REWARD_DISTRIBUTOR_ADDRESS': deployConfig.reward_distributor,
       'NEXT_PUBLIC_REWARD_TOKEN_ADDRESS': deployConfig.reward_token,
       'NEXT_PUBLIC_REWARD_SOURCE_NFT_ADDRESS': deployConfig.reward_source_nft,
       'NEXT_PUBLIC_IPFS_GATEWAY_URL': rootEnv.IPFS_GATEWAY_URL,

@@ -15,12 +15,12 @@ import { getEthBalance, requestFaucetEth } from '@/utils/wagmi-utils';
 
 // Get contract addresses from environment config
 import { 
-  getRewardsDistributorAddress, 
+  getRewardDistributorAddress, 
   getRewardTokenAddress, 
   getRewardSourceNftAddress 
 } from '@/utils/environmentConfig';
 
-const REWARDS_DISTRIBUTOR_ADDRESS = getRewardsDistributorAddress();
+const REWARD_DISTRIBUTOR_ADDRESS = getRewardDistributorAddress();
 const REWARD_TOKEN_ADDRESS = getRewardTokenAddress();
 const REWARD_SOURCE_NFT_ADDRESS = getRewardSourceNftAddress();
 
@@ -43,7 +43,7 @@ export default function AdminPage() {
     currentIpfsHash,
     merkleData,
     refresh,
-  } = useRewards({ distributorAddress: REWARDS_DISTRIBUTOR_ADDRESS });
+  } = useRewards({ distributorAddress: REWARD_DISTRIBUTOR_ADDRESS });
 
   // Contract write hooks
   const { 
@@ -100,7 +100,7 @@ export default function AdminPage() {
     address: REWARD_TOKEN_ADDRESS,
     abi: ERC20_ABI,
     functionName: 'balanceOf',
-    args: [REWARDS_DISTRIBUTOR_ADDRESS],
+    args: [REWARD_DISTRIBUTOR_ADDRESS],
     query: {
       enabled: isConnected
     }
@@ -189,7 +189,7 @@ export default function AdminPage() {
         address: REWARD_TOKEN_ADDRESS,
         abi: ERC20_ABI,
         functionName: 'mint',
-        args: [REWARDS_DISTRIBUTOR_ADDRESS, amount]
+        args: [REWARD_DISTRIBUTOR_ADDRESS, amount]
       });
     } catch (error) {
       console.error('Error minting reward tokens:', error);
@@ -232,7 +232,7 @@ export default function AdminPage() {
       setErrorMessage('');
 
       await writeAddTrigger({
-        address: REWARDS_DISTRIBUTOR_ADDRESS,
+        address: REWARD_DISTRIBUTOR_ADDRESS,
         abi: REWARDS_DISTRIBUTOR_ABI,
         functionName: 'addTrigger',
         args: [REWARD_TOKEN_ADDRESS, REWARD_SOURCE_NFT_ADDRESS]
@@ -361,7 +361,7 @@ export default function AdminPage() {
               <div className="mb-3">
                 <label className="block text-sm text-gray-400 mb-1">Distributor Contract</label>
                 <div className="address-pill py-2 px-3 text-xs bg-black/40">
-                  {REWARDS_DISTRIBUTOR_ADDRESS}
+                  {REWARD_DISTRIBUTOR_ADDRESS}
                 </div>
               </div>
               
@@ -417,7 +417,7 @@ export default function AdminPage() {
                 <div>
                   <label className="block text-sm text-gray-400 mb-1">Distributor Contract</label>
                   <div className="address-pill py-2 px-3 text-xs bg-black/40 overflow-x-auto">
-                    {REWARDS_DISTRIBUTOR_ADDRESS}
+                    {REWARD_DISTRIBUTOR_ADDRESS}
                   </div>
                 </div>
                 

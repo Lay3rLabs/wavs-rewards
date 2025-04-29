@@ -1,45 +1,46 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import {RewardsDistributor} from "contracts/RewardsDistributor.sol";
+import {stdJson} from "forge-std/StdJson.sol";
+import {console} from "forge-std/console.sol";
+
+import {Common} from "script/Common.s.sol";
+
+import {RewardDistributor} from "contracts/RewardDistributor.sol";
 import {RewardSourceERC721} from "contracts/RewardSourceERC721.sol";
 import {RewardERC20} from "contracts/RewardERC20.sol";
 import {ITypes} from "interfaces/ITypes.sol";
-import {Common} from "script/Common.s.sol";
-import {console} from "forge-std/console.sol";
-import {stdJson} from "forge-std/StdJson.sol";
 
-/// @dev Script to show the result of a trigger
-contract ShowResult is Common {
+/// @dev Script to claim rewards
+contract ClaimScript is Common {
     using stdJson for string;
 
-    string public script_output_path =
-        string.concat(vm.projectRoot(), "/.docker/script_deploy.json");
-
     function run(
-        string calldata serviceTriggerAddr,
-        string calldata //serviceHandlerAddr
+        string calldata rewardDistributorAddr,
+        string calldata rewardErc20Addr
     ) public {
+        address rewardErc20Address = vm.parseAddress(rewardErc20Addr);
+
         vm.startBroadcast(_privateKey);
-        RewardsDistributor rewardsDistributor = RewardsDistributor(
-            vm.parseAddress(serviceTriggerAddr)
+        RewardDistributor rewardDistributor = RewardDistributor(
+            vm.parseAddress(rewardDistributorAddr)
         );
 
-        ITypes.TriggerId triggerId = rewardsDistributor.nextTriggerId();
+        ITypes.TriggerId triggerId = rewardDistributor.nextTriggerId();
         console.log(
             "Fetching data for TriggerId",
             ITypes.TriggerId.unwrap(triggerId)
         );
 
-        bytes memory data = rewardsDistributor.getData(triggerId);
+        bytes memory data = rewardDistributor.getData(triggerId);
 
         ITypes.AvsOutput memory avsOutput = abi.decode(
             data,
             (ITypes.AvsOutput)
         );
 
-        bytes32 root = rewardsDistributor.root();
-        bytes32 ipfsHash = rewardsDistributor.ipfsHash();
+        bytes32 root = rewardDistributor.root();
+        bytes32 ipfsHash = rewardDistributor.ipfsHash();
 
         if (root == avsOutput.root && ipfsHash == avsOutput.ipfsHashData) {
             console.log(
@@ -101,14 +102,11 @@ contract ShowResult is Common {
 
         // Claim rewards with proof
         address claimer = vm.addr(_privateKey);
-        address rewardErc20Addr = vm.envAddress(
-            "WAVS_ENV_REWARD_TOKEN_ADDRESS"
-        );
-        RewardERC20 rewardErc20 = RewardERC20(rewardErc20Addr);
+        RewardERC20 rewardErc20 = RewardERC20(rewardErc20Address);
         uint256 balanceBefore = rewardErc20.balanceOf(claimer);
-        uint256 claimed = rewardsDistributor.claim(
+        uint256 claimed = rewardDistributor.claim(
             claimer,
-            rewardErc20Addr,
+            rewardErc20Address,
             claimable,
             proof
         );

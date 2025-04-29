@@ -8,7 +8,7 @@ default: build
 
 # Customize these variables
 COMPONENT_FILENAME ?= rewards.wasm
-TRIGGER_EVENT ?= NewTrigger(bytes)
+TRIGGER_EVENT ?= WavsRewardsTrigger(uint64,address,address)
 SERVICE_CONFIG ?= '{"fuel_limit":100000000,"max_gas":5000000,"host_envs":["WAVS_ENV_REWARD_TOKEN_ADDRESS","WAVS_ENV_REWARD_SOURCE_NFT_ADDRESS","WAVS_ENV_PINATA_API_URL","WAVS_ENV_PINATA_API_KEY"],"kv":[],"workflow_id":"default","component_id":"default"}'
 
 # Define common variables
@@ -17,8 +17,9 @@ WAVS_CMD ?= $(SUDO) docker run --rm --network host $$(test -f .env && echo "--en
 ANVIL_PRIVATE_KEY?=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
 RPC_URL?=http://localhost:8545
 SERVICE_MANAGER_ADDR?=`jq -r '.eigen_service_managers.local | .[-1]' .docker/deployments.json`
-SERVICE_TRIGGER_ADDR?=`jq -r '.trigger' "./.docker/script_deploy.json"`
-SERVICE_SUBMISSION_ADDR?=`jq -r '.service_handler' "./.docker/script_deploy.json"`
+REWARD_DISTRIBUTOR_ADDR?=`jq -r '.reward_distributor' "./.docker/script_deploy.json"`
+REWARD_TOKEN_ADDRESS?=`jq -r '.reward_token' .docker/script_deploy.json`
+REWARD_SOURCE_NFT_ADDRESS?=`jq -r '.reward_source_nft' .docker/script_deploy.json`
 
 ## check-requirements: verify system requirements are installed
 check-requirements: check-node check-jq check-cargo
@@ -34,13 +35,6 @@ wasi-build:
 	done
 	@mkdir -p ./compiled
 	@cp ./target/wasm32-wasip1/release/*.wasm ./compiled/
-
-## wasi-exec: executing the WAVS wasi component(s) | COMPONENT_FILENAME
-wasi-exec:
-	@$(WAVS_CMD) exec --log-level=info --data /data/.docker --home /data \
-	--component "/data/compiled/${COMPONENT_FILENAME}" \
-	--service-config $(SERVICE_CONFIG) \
-	--input `cast format-bytes32-string "data"`
 
 ## update-submodules: update the git submodules
 update-submodules:
@@ -78,33 +72,37 @@ start-all: clean-docker setup-env
 	@rm --interactive=never .docker/*.json || true
 	@bash -ec 'anvil & anvil_pid=$$!; trap "kill -9 $$anvil_pid 2>/dev/null" EXIT; $(SUDO) docker compose up; wait'
 
-## get-service-handler: getting the service handler address from the script deploy
-get-service-handler-from-deploy:
-	@jq -r '.service_handler' "./.docker/script_deploy.json"
+## deploy-contracts: deploying the contracts | SERVICE_MANAGER_ADDR, RPC_URL
+deploy-contracts:
+	@forge script ./script/Deploy.s.sol ${SERVICE_MANAGER_ADDR} --sig "run(string)" --rpc-url $(RPC_URL) --broadcast
 
 get-eigen-service-manager-from-deploy:
 	@jq -r '.eigen_service_managers.local | .[-1]' .docker/deployments.json
 
-## get-trigger: getting the trigger address from the script deploy
-get-trigger-from-deploy:
-	@jq -r '.trigger' "./.docker/script_deploy.json"
+## get-distributor-from-deploy: getting the distributor address from the script deploy
+get-distributor-from-deploy:
+	@jq -r '.reward_distributor' "./.docker/script_deploy.json"
 
 ## wavs-cli: running wavs-cli in docker
 wavs-cli:
 	@$(WAVS_CMD) $(filter-out $@,$(MAKECMDGOALS))
 
-## deploy-service: deploying the WAVS component service | COMPONENT_FILENAME, TRIGGER_EVENT, SERVICE_TRIGGER_ADDR, SERVICE_SUBMISSION_ADDR, SERVICE_CONFIG
+## deploy-service: deploying the WAVS component service | COMPONENT_FILENAME, TRIGGER_EVENT, REWARD_DISTRIBUTOR_ADDR, SERVICE_CONFIG
 deploy-service:
 	@$(WAVS_CMD) deploy-service --log-level=info --data /data/.docker --home /data \
 	--component "/data/compiled/${COMPONENT_FILENAME}" \
 	--trigger-event-name "${TRIGGER_EVENT}" \
-	--trigger-address "${SERVICE_TRIGGER_ADDR}" \
-	--submit-address "${SERVICE_SUBMISSION_ADDR}" \
+	--trigger-address "${REWARD_DISTRIBUTOR_ADDR}" \
+	--submit-address "${REWARD_DISTRIBUTOR_ADDR}" \
 	--service-config ${SERVICE_CONFIG}
 
-## show-result: showing the result | SERVICE_TRIGGER_ADDR, SERVICE_SUBMISSION_ADDR, RPC_URL
-show-result:
-	@forge script ./script/ShowResult.s.sol ${SERVICE_TRIGGER_ADDR} ${SERVICE_SUBMISSION_ADDR} --sig "run(string,string)" --rpc-url $(RPC_URL) --broadcast -v 4
+## trigger-service: triggering the service | REWARD_DISTRIBUTOR_ADDR, REWARD_TOKEN_ADDRESS, REWARD_SOURCE_NFT_ADDRESS, RPC_URL
+trigger-service:
+	@forge script ./script/Trigger.s.sol ${REWARD_DISTRIBUTOR_ADDR} ${REWARD_TOKEN_ADDRESS} ${REWARD_SOURCE_NFT_ADDRESS} --sig "run(string,string,string)" --rpc-url $(RPC_URL) --broadcast -v 4
+
+## claim: claiming the rewards | REWARD_DISTRIBUTOR_ADDR, REWARD_TOKEN_ADDRESS, RPC_URL
+claim:
+	@forge script ./script/Claim.s.sol ${REWARD_DISTRIBUTOR_ADDR} ${REWARD_TOKEN_ADDRESS} --sig "run(string,string)" --rpc-url $(RPC_URL) --broadcast -v 4
 
 _build_forge:
 	@forge build

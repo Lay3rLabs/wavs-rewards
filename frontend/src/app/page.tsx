@@ -11,10 +11,10 @@ import { useRewards } from '@/hooks/useRewards';
 
 // Get contract addresses from environment config
 import { 
-  getRewardsDistributorAddress, 
+  getRewardDistributorAddress, 
 } from '@/utils/environmentConfig';
 
-const REWARDS_DISTRIBUTOR_ADDRESS = getRewardsDistributorAddress();
+const REWARD_DISTRIBUTOR_ADDRESS = getRewardDistributorAddress();
 
 export default function Home() {
   const { isConnected } = useAccount();
@@ -31,7 +31,7 @@ export default function Home() {
     rewardSources,
     claim,
     refresh,
-  } = useRewards({ distributorAddress: REWARDS_DISTRIBUTOR_ADDRESS });
+  } = useRewards({ distributorAddress: REWARD_DISTRIBUTOR_ADDRESS });
 
   return (
     <div className="space-y-8">
@@ -143,7 +143,7 @@ export default function Home() {
           <div className="flex flex-col">
             <span className="data-label">Distributor Contract</span>
             <div className="address-pill mt-1 overflow-x-auto">
-              {REWARDS_DISTRIBUTOR_ADDRESS}
+              {REWARD_DISTRIBUTOR_ADDRESS}
             </div>
           </div>
           
