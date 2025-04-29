@@ -241,3 +241,15 @@ To test the reward system, follow these steps:
    - Hit claim and see it in the history
    - See a breakdown of reward sources
    - Debug raw merkle tree data
+
+## Claude Code
+
+To spin up a sandboxed instance of [Claude Code](https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/overview) in a Docker container that only has access to this project's files, run the following command:
+
+```bash
+npm run claude-code
+# or with no restrictions (--dangerously-skip-permissions)
+npm run claude-code:unrestricted
+```
+
+You must have [Docker](https://www.docker.com/) installed.

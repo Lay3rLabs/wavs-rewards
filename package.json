@@ -13,7 +13,9 @@
     "test": "forge test -vvv",
     "test:integration": "forge test --match-contract Integration -vvv",
     "test:unit": "forge test --match-contract Unit -vvv",
-    "postinstall": "mkdir -p node_modules/@morpho-org/universal-rewards-distributor/lib/ && ln -s ../../../@openzeppelin node_modules/@morpho-org/universal-rewards-distributor/lib/openzeppelin-contracts"
+    "postinstall": "mkdir -p node_modules/@morpho-org/universal-rewards-distributor/lib/ && ln -s ../../../@openzeppelin node_modules/@morpho-org/universal-rewards-distributor/lib/openzeppelin-contracts",
+    "claude-code": "docker compose -f .claude/docker-compose.claude.yml run --rm --remove-orphans -it claude-code-sandbox bash -c 'claude; exec'",
+    "claude-code:unrestricted": "docker compose -f .claude/docker-compose.claude.yml run --rm --remove-orphans -it claude-code-sandbox bash -c 'claude --dangerously-skip-permissions; exec'"
   },
   "lint-staged": {
     "*.{js,css,md,ts,sol}": "forge fmt",
