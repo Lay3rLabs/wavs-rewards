@@ -166,7 +166,7 @@ export async function fetchClaimEvents(
     );
     
     const filter = distributor.filters.Claimed(account);
-    const events = await distributor.queryFilter(filter);
+    const events = await distributor.queryFilter(filter) as ethers.EventLog[];
     
     console.log(`Found ${events.length} claim events`);
     
@@ -176,6 +176,9 @@ export async function fetchClaimEvents(
         account: args![0],
         reward: args![1],
         amount: args![2].toString(),
+        claimable: args![2].toString(),
+        claimed: args![2].toString(),
+        proof: [],
         blockNumber,
         transactionHash,
         timestamp: Date.now() / 1000 // Placeholder, ideally we'd get the block timestamp
