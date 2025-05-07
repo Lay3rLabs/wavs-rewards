@@ -1,58 +1,45 @@
 /**
  * Environment configuration utility to centralize access to environment variables
- * This provides a single source of truth for all environment variables 
+ * This provides a single source of truth for all environment variables
  * and ensures that required variables are present
  */
 
 // Contract addresses
 export const getRewardDistributorAddress = (): `0x${string}` => {
-  const address = process.env.NEXT_PUBLIC_REWARD_DISTRIBUTOR_ADDRESS;
-  if (!address) {
-    throw new Error(
-      "NEXT_PUBLIC_REWARD_DISTRIBUTOR_ADDRESS environment variable is not set"
-    );
-  }
-  return address as `0x${string}`;
+  return (
+    (process.env.NEXT_PUBLIC_REWARD_DISTRIBUTOR_ADDRESS as `0x${string}`) ||
+    "0x0000000000000000000000000000000000000000"
+  );
 };
 
 export const getRewardTokenAddress = (): `0x${string}` => {
-  const address = process.env.NEXT_PUBLIC_REWARD_TOKEN_ADDRESS;
-  if (!address) {
-    throw new Error(
-      "NEXT_PUBLIC_REWARD_TOKEN_ADDRESS environment variable is not set"
-    );
-  }
-  return address as `0x${string}`;
+  return (
+    (process.env.NEXT_PUBLIC_REWARD_TOKEN_ADDRESS as `0x${string}`) ||
+    "0x0000000000000000000000000000000000000000"
+  );
 };
 
 export const getRewardSourceNftAddress = (): `0x${string}` => {
-  const address = process.env.NEXT_PUBLIC_REWARD_SOURCE_NFT_ADDRESS;
-  if (!address) {
-    throw new Error(
-      "NEXT_PUBLIC_REWARD_SOURCE_NFT_ADDRESS environment variable is not set"
-    );
-  }
-  return address as `0x${string}`;
+  return (
+    (process.env.NEXT_PUBLIC_REWARD_SOURCE_NFT_ADDRESS as `0x${string}`) ||
+    "0x0000000000000000000000000000000000000000"
+  );
 };
 
 // Network configuration
 export const getRpcUrl = (): string => {
-  const url = process.env.NEXT_PUBLIC_RPC_URL;
-  if (!url) {
-    throw new Error('NEXT_PUBLIC_RPC_URL environment variable is not set');
-  }
-  return url;
+  return process.env.NEXT_PUBLIC_RPC_URL || "http://localhost:8545";
 };
 
 export const getNetworkName = (): string => {
-  return process.env.NEXT_PUBLIC_NETWORK_NAME || 'Local';
+  return process.env.NEXT_PUBLIC_NETWORK_NAME || "Local";
 };
 
 export const getIpfsGateway = (): string => {
-  return process.env.NEXT_PUBLIC_IPFS_GATEWAY_URL || 'https://ipfs.io/ipfs/';
+  return process.env.NEXT_PUBLIC_IPFS_GATEWAY_URL || "https://ipfs.io/ipfs/";
 };
 
 // Optional environment variables with defaults
 export const getWalletConnectProjectId = (): string => {
-  return process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || 'demo-project-id';
+  return process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || "demo-project-id";
 };

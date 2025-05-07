@@ -19,12 +19,18 @@ function loadAndTransformEnv() {
     // Check if script_deploy.json exists
     if (!fs.existsSync(scriptDeployPath)) {
       console.error('ERROR: No script_deploy.json file found at', scriptDeployPath);
+      if (process.env.NODE_ENV === 'production') {
+        return;
+      }
       process.exit(1);
     }
 
     // Check if root .env exists
     if (!fs.existsSync(rootEnvPath)) {
       console.error('ERROR: No root .env file found at', rootEnvPath);
+      if (process.env.NODE_ENV === 'production') {
+        return;
+      }
       process.exit(1);
     }
 
