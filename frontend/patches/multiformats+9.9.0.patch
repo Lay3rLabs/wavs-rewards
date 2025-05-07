@@ -1,0 +1,154 @@
+diff --git a/node_modules/multiformats/package.json b/node_modules/multiformats/package.json
+index b204fc4..002db7c 100644
+--- a/node_modules/multiformats/package.json
++++ b/node_modules/multiformats/package.json
+@@ -40,107 +40,128 @@
+     ".": {
+       "browser": "./esm/src/index.js",
+       "require": "./cjs/src/index.js",
+-      "import": "./esm/src/index.js"
++      "import": "./esm/src/index.js",
++      "types": "./types/src/index.d.ts"
+     },
+     "./cid": {
+       "browser": "./esm/src/cid.js",
+       "require": "./cjs/src/cid.js",
+-      "import": "./esm/src/cid.js"
++      "import": "./esm/src/cid.js",
++      "types": "./types/src/cid.d.ts"
+     },
+     "./basics": {
+       "browser": "./esm/src/basics.js",
+       "require": "./cjs/src/basics.js",
+-      "import": "./esm/src/basics.js"
++      "import": "./esm/src/basics.js",
++      "types": "./types/src/basics.d.ts"
+     },
+     "./block": {
+       "browser": "./esm/src/block.js",
+       "require": "./cjs/src/block.js",
+-      "import": "./esm/src/block.js"
++      "import": "./esm/src/block.js",
++      "types": "./types/src/block.d.ts"
+     },
+     "./traversal": {
+       "browser": "./esm/src/traversal.js",
+       "require": "./cjs/src/traversal.js",
+-      "import": "./esm/src/traversal.js"
++      "import": "./esm/src/traversal.js",
++      "types": "./types/src/traversal.d.ts"
+     },
+     "./bases/identity": {
+       "browser": "./esm/src/bases/identity.js",
+       "require": "./cjs/src/bases/identity.js",
+-      "import": "./esm/src/bases/identity.js"
++      "import": "./esm/src/bases/identity.js",
++      "types": "./types/src/bases/identity.d.ts"
+     },
+     "./bases/base2": {
+       "browser": "./esm/src/bases/base2.js",
+       "require": "./cjs/src/bases/base2.js",
+-      "import": "./esm/src/bases/base2.js"
++      "import": "./esm/src/bases/base2.js",
++      "types": "./types/src/bases/base2.d.ts"
+     },
+     "./bases/base8": {
+       "browser": "./esm/src/bases/base8.js",
+       "require": "./cjs/src/bases/base8.js",
+-      "import": "./esm/src/bases/base8.js"
++      "import": "./esm/src/bases/base8.js",
++      "types": "./types/src/bases/base8.d.ts"
+     },
+     "./bases/base10": {
+       "browser": "./esm/src/bases/base10.js",
+       "require": "./cjs/src/bases/base10.js",
+-      "import": "./esm/src/bases/base10.js"
++      "import": "./esm/src/bases/base10.js",
++      "types": "./types/src/bases/base10.d.ts"
+     },
+     "./bases/base16": {
+       "browser": "./esm/src/bases/base16.js",
+       "require": "./cjs/src/bases/base16.js",
+-      "import": "./esm/src/bases/base16.js"
++      "import": "./esm/src/bases/base16.js",
++      "types": "./types/src/bases/base16.d.ts"
+     },
+     "./bases/base32": {
+       "browser": "./esm/src/bases/base32.js",
+       "require": "./cjs/src/bases/base32.js",
+-      "import": "./esm/src/bases/base32.js"
++      "import": "./esm/src/bases/base32.js",
++      "types": "./types/src/bases/base32.d.ts"
+     },
+     "./bases/base36": {
+       "browser": "./esm/src/bases/base36.js",
+       "require": "./cjs/src/bases/base36.js",
+-      "import": "./esm/src/bases/base36.js"
++      "import": "./esm/src/bases/base36.js",
++      "types": "./types/src/bases/base36.d.ts"
+     },
+     "./bases/base58": {
+       "browser": "./esm/src/bases/base58.js",
+       "require": "./cjs/src/bases/base58.js",
+-      "import": "./esm/src/bases/base58.js"
++      "import": "./esm/src/bases/base58.js",
++      "types": "./types/src/bases/base58.d.ts"
+     },
+     "./bases/base64": {
+       "browser": "./esm/src/bases/base64.js",
+       "require": "./cjs/src/bases/base64.js",
+-      "import": "./esm/src/bases/base64.js"
++      "import": "./esm/src/bases/base64.js",
++      "types": "./types/src/bases/base64.d.ts"
+     },
+     "./bases/base256emoji": {
+       "browser": "./esm/src/bases/base256emoji.js",
+       "require": "./cjs/src/bases/base256emoji.js",
+-      "import": "./esm/src/bases/base256emoji.js"
++      "import": "./esm/src/bases/base256emoji.js",
++      "types": "./types/src/bases/base256emoji.d.ts"
+     },
+     "./hashes/hasher": {
+       "browser": "./esm/src/hashes/hasher.js",
+       "require": "./cjs/src/hashes/hasher.js",
+-      "import": "./esm/src/hashes/hasher.js"
++      "import": "./esm/src/hashes/hasher.js",
++      "types": "./types/src/hashes/hasher.d.ts"
+     },
+     "./hashes/digest": {
+       "browser": "./esm/src/hashes/digest.js",
+       "require": "./cjs/src/hashes/digest.js",
+-      "import": "./esm/src/hashes/digest.js"
++      "import": "./esm/src/hashes/digest.js",
++      "types": "./types/src/hashes/digest.d.ts"
+     },
+     "./hashes/sha2": {
+       "browser": "./esm/src/hashes/sha2-browser.js",
+       "require": "./cjs/src/hashes/sha2.js",
+-      "import": "./esm/src/hashes/sha2.js"
++      "import": "./esm/src/hashes/sha2.js",
++      "types": "./types/src/hashes/sha2.d.ts"
+     },
+     "./hashes/identity": {
+       "browser": "./esm/src/hashes/identity.js",
+       "require": "./cjs/src/hashes/identity.js",
+-      "import": "./esm/src/hashes/identity.js"
++      "import": "./esm/src/hashes/identity.js",
++      "types": "./types/src/hashes/identity.d.ts"
+     },
+     "./codecs/json": {
+       "browser": "./esm/src/codecs/json.js",
+       "require": "./cjs/src/codecs/json.js",
+-      "import": "./esm/src/codecs/json.js"
++      "import": "./esm/src/codecs/json.js",
++      "types": "./types/src/codecs/json.d.ts"
+     },
+     "./codecs/raw": {
+       "browser": "./esm/src/codecs/raw.js",
+       "require": "./cjs/src/codecs/raw.js",
+-      "import": "./esm/src/codecs/raw.js"
++      "import": "./esm/src/codecs/raw.js",
++      "types": "./types/src/codecs/raw.d.ts"
+     }
+   },
+   "devDependencies": {

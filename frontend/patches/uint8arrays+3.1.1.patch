@@ -1,0 +1,63 @@
+diff --git a/node_modules/uint8arrays/package.json b/node_modules/uint8arrays/package.json
+index b9e5c16..c5b52ef 100644
+--- a/node_modules/uint8arrays/package.json
++++ b/node_modules/uint8arrays/package.json
+@@ -50,42 +50,50 @@
+     ".": {
+       "browser": "./esm/src/index.js",
+       "require": "./cjs/src/index.js",
+-      "import": "./esm/src/index.js"
++      "import": "./esm/src/index.js",
++      "types": "./types/src/index.d.ts"
+     },
+     "./alloc": {
+       "browser": "./esm/src/alloc.js",
+       "require": "./cjs/src/alloc.js",
+-      "import": "./esm/src/alloc.js"
++      "import": "./esm/src/alloc.js",
++      "types": "./types/src/alloc.d.ts"
+     },
+     "./compare": {
+       "browser": "./esm/src/compare.js",
+       "require": "./cjs/src/compare.js",
+-      "import": "./esm/src/compare.js"
++      "import": "./esm/src/compare.js",
++      "types": "./types/src/compare.d.ts"
+     },
+     "./concat": {
+       "browser": "./esm/src/concat.js",
+       "require": "./cjs/src/concat.js",
+-      "import": "./esm/src/concat.js"
++      "import": "./esm/src/concat.js",
++      "types": "./types/src/concat.d.ts"
+     },
+     "./equals": {
+       "browser": "./esm/src/equals.js",
+       "require": "./cjs/src/equals.js",
+-      "import": "./esm/src/equals.js"
++      "import": "./esm/src/equals.js",
++      "types": "./types/src/equals.d.ts"
+     },
+     "./from-string": {
+       "browser": "./esm/src/from-string.js",
+       "require": "./cjs/src/from-string.js",
+-      "import": "./esm/src/from-string.js"
++      "import": "./esm/src/from-string.js",
++      "types": "./types/src/from-string.d.ts"
+     },
+     "./to-string": {
+       "browser": "./esm/src/to-string.js",
+       "require": "./cjs/src/to-string.js",
+-      "import": "./esm/src/to-string.js"
++      "import": "./esm/src/to-string.js",
++      "types": "./types/src/to-string.d.ts"
+     },
+     "./xor": {
+       "browser": "./esm/src/xor.js",
+       "require": "./cjs/src/xor.js",
+-      "import": "./esm/src/xor.js"
++      "import": "./esm/src/xor.js",
++      "types": "./types/src/xor.d.ts"
+     }
+   },
+   "contributors": [
