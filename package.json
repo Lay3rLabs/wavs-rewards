@@ -1,6 +1,6 @@
 {
   "name": "wavs-rewards",
-  "version": "1.0.0",
+  "version": "0.4.0-beta.2",
   "license": "MIT",
   "scripts": {
     "build": "forge build",
@@ -27,8 +27,8 @@
     "@commitlint/config-conventional": "19.2.2",
     "@defi-wonderland/natspec-smells": "1.1.6",
     "@morpho-org/universal-rewards-distributor": "github:lay3rlabs/universal-rewards-distributor#0de86bde8f949b35fdc61e533cc240fa541e27fe",
-    "@openzeppelin/contracts": "^4.9.2",
-    "@wavs/solidity": "^0.3.0",
+    "@openzeppelin/contracts": "^5.2.0",
+    "@wavs/solidity": "0.4.0-beta.1",
     "forge-std": "github:foundry-rs/forge-std#v1.9.6",
     "lint-staged": ">=10",
     "solhint-community": "4.0.0",

@@ -4,8 +4,16 @@ cache/
 broadcast/
 compiled/*.wasm
 .docker/*.json
+.docker/*.log
 .env
+.env-e
 .env.local
 node_modules/
 lcov.info
-.next/
+internal/
+wavs:worker*.wit
+wavs:worker*.wasm
+.nodes
+
+.next
+.DS_Store

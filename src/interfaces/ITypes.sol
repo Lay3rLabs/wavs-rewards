@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.22;
 
 interface ITypes {
     /**
-     * @notice Struct to store trigger output data
+     * @notice Struct to store trigger information
      * @param triggerId Unique identifier for the trigger
      * @param data Data associated with the triggerId
      */
@@ -24,6 +24,12 @@ interface ITypes {
     }
 
     /**
+     * @notice Event emitted when a new trigger is created
+     * @param triggerId Unique identifier for the trigger
+     */
+    event WavsRewardsTrigger(uint64 triggerId);
+
+    /**
      * @notice Struct to store trigger information
      * @param triggerId Unique identifier for the trigger
      * @param creator Address of the creator of the trigger
@@ -37,15 +43,9 @@ interface ITypes {
 
     /**
      * @notice Event emitted when a new trigger is created
-     * @param triggerId Unique identifier for the trigger
-     * @param rewardTokenAddr Address of the reward token
-     * @param rewardSourceNftAddr Address of the reward source NFT
+     * @param _triggerInfo Encoded TriggerInfo struct
      */
-    event WavsRewardsTrigger(
-        uint64 triggerId,
-        address rewardTokenAddr,
-        address rewardSourceNftAddr
-    );
+    event NewTrigger(bytes _triggerInfo);
 
     /// @notice TriggerId is a unique identifier for a trigger
     type TriggerId is uint64;

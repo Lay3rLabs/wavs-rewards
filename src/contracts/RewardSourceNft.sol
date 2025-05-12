@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.22;
 
 import {ERC721} from "@openzeppelin-contracts/token/ERC721/ERC721.sol";
 
-contract RewardSourceERC721 is ERC721 {
+contract RewardSourceNft is ERC721 {
     // Mapping to track if an address is a holder
     mapping(address => bool) public isHolder;
     // Array to store all unique holders
     address[] private holders;
 
-    constructor() ERC721("RewardSource", "RSNFT") {}
+    constructor() ERC721("RewardSourceNft", "RSNFT") {}
 
     // Let anyone mint an NFT.
     function mint(address to, uint256 tokenId) external {
@@ -29,7 +29,7 @@ contract RewardSourceERC721 is ERC721 {
         bytes memory data
     ) internal virtual override {
         super._safeTransfer(from, to, tokenId, data);
-        
+
         // Add new holder if not already tracked
         if (!isHolder[to]) {
             isHolder[to] = true;
@@ -44,7 +44,7 @@ contract RewardSourceERC721 is ERC721 {
         uint256 tokenId
     ) public virtual override {
         super.transferFrom(from, to, tokenId);
-        
+
         // Add new holder if not already tracked
         if (!isHolder[to]) {
             isHolder[to] = true;

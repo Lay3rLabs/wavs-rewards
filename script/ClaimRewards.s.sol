@@ -7,23 +7,22 @@ import {console} from "forge-std/console.sol";
 import {Common} from "script/Common.s.sol";
 
 import {RewardDistributor} from "contracts/RewardDistributor.sol";
-import {RewardSourceERC721} from "contracts/RewardSourceERC721.sol";
-import {RewardERC20} from "contracts/RewardERC20.sol";
+import {RewardToken} from "contracts/RewardToken.sol";
 import {ITypes} from "interfaces/ITypes.sol";
 
 /// @dev Script to claim rewards
-contract ClaimScript is Common {
+contract ClaimRewards is Common {
     using stdJson for string;
 
     function run(
         string calldata rewardDistributorAddr,
-        string calldata rewardErc20Addr
+        string calldata rewardTokenAddr
     ) public {
-        address rewardErc20Address = vm.parseAddress(rewardErc20Addr);
+        address rewardTokenAddress = vm.parseAddress(rewardTokenAddr);
 
         vm.startBroadcast(_privateKey);
         RewardDistributor rewardDistributor = RewardDistributor(
-            vm.parseAddress(rewardDistributorAddr)
+            payable(vm.parseAddress(rewardDistributorAddr))
         );
 
         ITypes.TriggerId triggerId = rewardDistributor.nextTriggerId();
@@ -41,10 +40,11 @@ contract ClaimScript is Common {
 
         bytes32 root = rewardDistributor.root();
         bytes32 ipfsHash = rewardDistributor.ipfsHash();
+        string memory ipfsHashCid = rewardDistributor.ipfsHashCid();
 
         if (root == avsOutput.root && ipfsHash == avsOutput.ipfsHashData) {
             console.log(
-                "Trigger executed successfully, root and ipfsHash match."
+                "Trigger executed successfully, root and ipfsHash match. This means the last rewards update occurred due to a manual trigger."
             );
             console.log("");
             console.log("--------------------------------");
@@ -53,11 +53,14 @@ contract ClaimScript is Common {
             console.log("");
             console.log("ipfsHash:");
             console.logBytes32(ipfsHash);
-            console.log(avsOutput.ipfsHash);
+            console.log("ipfsHashCid:");
+            console.log(ipfsHashCid);
             console.log("--------------------------------");
             console.log("");
         } else {
-            console.log("Trigger failed, root or ipfsHash mismatch");
+            console.log(
+                "Trigger failed, root or ipfsHash mismatch. This will happen if the last rewards update occurred due to a cron schedule and not a manual trigger."
+            );
             console.log("");
             console.log("--------------------------------");
             console.log("");
@@ -66,6 +69,8 @@ contract ClaimScript is Common {
             console.log("");
             console.log("contract ipfsHash:");
             console.logBytes32(ipfsHash);
+            console.log("contract ipfsHashCid:");
+            console.log(ipfsHashCid);
             console.log("");
             console.log("--------------------------------");
             console.log("");
@@ -84,7 +89,7 @@ contract ClaimScript is Common {
 
         // access IPFS_GATEWAY_URL from env
         string memory ipfsGatewayUrl = vm.envString("IPFS_GATEWAY_URL");
-        string memory url = string.concat(ipfsGatewayUrl, avsOutput.ipfsHash);
+        string memory url = string.concat(ipfsGatewayUrl, ipfsHashCid);
 
         console.log("Merkle data URL: ", url);
         console.log("Claiming rewards...");
@@ -102,15 +107,15 @@ contract ClaimScript is Common {
 
         // Claim rewards with proof
         address claimer = vm.addr(_privateKey);
-        RewardERC20 rewardErc20 = RewardERC20(rewardErc20Address);
-        uint256 balanceBefore = rewardErc20.balanceOf(claimer);
+        RewardToken rewardToken = RewardToken(rewardTokenAddress);
+        uint256 balanceBefore = rewardToken.balanceOf(claimer);
         uint256 claimed = rewardDistributor.claim(
             claimer,
-            rewardErc20Address,
+            rewardTokenAddress,
             claimable,
             proof
         );
-        uint256 balanceAfter = rewardErc20.balanceOf(claimer);
+        uint256 balanceAfter = rewardToken.balanceOf(claimer);
 
         console.log("Balance before:", balanceBefore);
         console.log("Balance after:", balanceAfter);

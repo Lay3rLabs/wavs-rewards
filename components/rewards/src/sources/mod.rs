@@ -1,8 +1,8 @@
 use std::collections::HashSet;
 
-use alloy_primitives::U256;
 use anyhow::Result;
 use async_trait::async_trait;
+use wavs_wasi_utils::evm::alloy_primitives::U256;
 
 pub mod erc721;
 

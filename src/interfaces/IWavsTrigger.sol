@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.22;
 
 import {ITypes} from "interfaces/ITypes.sol";
 
-interface ISimpleTrigger is ITypes {
+interface IWavsTrigger is ITypes {
     /**
      * @notice Struct to store trigger information
      * @param creator Address of the creator of the trigger
@@ -19,13 +19,8 @@ interface ISimpleTrigger is ITypes {
     //////////////////////////////////////////////////////////////*/
     /**
      * @notice Add a new trigger
-     * @param rewardTokenAddr Address of the reward token
-     * @param rewardSourceNftAddr Address of the reward source NFT
      */
-    function addTrigger(
-        address rewardTokenAddr,
-        address rewardSourceNftAddr
-    ) external;
+    function addTrigger() external;
 
     /**
      * @notice Get a single trigger by triggerId

@@ -1,13 +1,15 @@
-use crate::bindings::host::get_eth_chain_config;
+use crate::bindings::host::get_evm_chain_config;
 use alloy_network::Ethereum;
-use alloy_primitives::{Address, TxKind, U256};
 use alloy_provider::{Provider, RootProvider};
 use alloy_rpc_types::TransactionInput;
 use alloy_sol_types::{sol, SolCall, SolType};
 use anyhow::Result;
 use async_trait::async_trait;
 use std::str::FromStr;
-use wavs_wasi_chain::ethereum::new_eth_provider;
+use wavs_wasi_utils::evm::{
+    alloy_primitives::{Address, TxKind, U256},
+    new_evm_provider,
+};
 
 use super::Source;
 
@@ -53,9 +55,9 @@ impl Source for Erc721Source {
 
 impl Erc721Source {
     async fn query_nft_ownership(&self, owner: Address) -> Result<U256> {
-        let chain_config = get_eth_chain_config("local").unwrap();
+        let chain_config = get_evm_chain_config("local").unwrap();
         let provider: RootProvider<Ethereum> =
-            new_eth_provider::<Ethereum>(chain_config.http_endpoint.unwrap());
+            new_evm_provider::<Ethereum>(chain_config.http_endpoint.unwrap());
 
         let balance_call = IERC721::balanceOfCall { owner };
         let tx = alloy_rpc_types::eth::TransactionRequest {
@@ -64,26 +66,26 @@ impl Erc721Source {
             ..Default::default()
         };
 
-        let result = provider.call(&tx).await?;
+        let result = provider.call(tx).await?;
 
         Ok(U256::from_be_slice(&result))
     }
 
     async fn query_holders(&self) -> Result<Vec<String>> {
-        let chain_config = get_eth_chain_config("local").unwrap();
+        let chain_config = get_evm_chain_config("local").unwrap();
         let provider: RootProvider<Ethereum> =
-            new_eth_provider::<Ethereum>(chain_config.http_endpoint.unwrap());
+            new_evm_provider::<Ethereum>(chain_config.http_endpoint.unwrap());
 
-        let holders_call = IRewardSourceERC721::getAllHoldersCall {};
+        let holders_call = IRewardSourceNft::getAllHoldersCall {};
         let tx = alloy_rpc_types::eth::TransactionRequest {
             to: Some(TxKind::Call(self.address)),
             input: TransactionInput { input: Some(holders_call.abi_encode().into()), data: None },
             ..Default::default()
         };
 
-        let result = provider.call(&tx).await?.to_vec();
+        let result = provider.call(tx).await?.to_vec();
 
-        let holders: Vec<Address> = <sol! { address[] }>::abi_decode(&result, false)?;
+        let holders: Vec<Address> = <sol! { address[] }>::abi_decode(&result)?;
         Ok(holders.into_iter().map(|h| h.to_string()).collect())
     }
 }
@@ -92,7 +94,7 @@ sol! {
     interface IERC721 {
         function balanceOf(address owner) external view returns (uint256);
     }
-    interface IRewardSourceERC721 {
+    interface IRewardSourceNft {
         function getAllHolders() external view returns (address[] memory);
     }
 }

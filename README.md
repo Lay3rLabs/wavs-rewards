@@ -89,8 +89,8 @@ This project demonstrates a complete web3 reward distribution system with the fo
 1. **Solidity Smart Contracts**:
 
    - `RewardDistributor.sol`: Main contract for distributing rewards based on Merkle proofs
-   - `RewardERC20.sol`: ERC20 token used for rewards
-   - `RewardSourceERC721.sol`: NFT contract that determines reward eligibility
+   - `RewardToken.sol`: ERC20 token used for rewards
+   - `RewardSourceNft.sol`: NFT contract that determines reward eligibility
 
 2. **AVS Component (Rust)**:
 
@@ -108,24 +108,29 @@ This project demonstrates a complete web3 reward distribution system with the fo
 
 ## Installation and Setup
 
-### Solidity
-
-Install the required packages to build the Solidity contracts. This project supports both [submodules](./.gitmodules) and [npm packages](./package.json).
+### Configure environment
 
 ```bash
 # Install packages (npm & submodules)
 make setup
 
-# Build the contracts
-forge build
-
 # Run the solidity tests
-forge test
+make test
+
+# copy the example env file
+cp .env.example .env
 ```
 
-### Build WASI components
+Set the following environment variables in the `.env` file:
 
-Now build the WASI rust components into the `compiled` output directory.
+- `WAVS_ENV_PINATA_API_KEY`
+- `IPFS_GATEWAY_URL`
+
+These come from [https://pinata.cloud](pinata.cloud) and are used to upload NFT metadata to IPFS.
+
+### Build Solidity contracts and WASI components
+
+Now build the Solidity contracts and WASI rust components into the `compiled` output directory.
 
 > [!WARNING]
 > If you get: `error: no registry configured for namespace "wavs"`
@@ -138,7 +143,7 @@ Now build the WASI rust components into the `compiled` output directory.
 > `brew uninstall rust` & install it from <https://rustup.rs>
 
 ```bash
-make wasi-build # or `make build` to include solidity compilation.
+make build
 ```
 
 ## WAVS
@@ -154,41 +159,41 @@ make wasi-build # or `make build` to include solidity compilation.
 > - Docker Desktop: Settings -> Resources -> Network -> 'Enable Host Networking'
 > - `brew install chipmk/tap/docker-mac-net-connect && sudo brew services start chipmk/tap/docker-mac-net-connect`
 
-### Start Environment
+### Start WAVS and Anvil
 
-Start an ethereum node (anvil), the WAVS service, and deploy [eigenlayer](https://www.eigenlayer.xyz/) contracts to the local network.
-
-```bash
-cp .env.example .env
-
-# Start the backend
-#
-# This must remain running in your terminal. Use another terminal to run other commands.
-# You can stop the services with `ctrl+c`. Some MacOS terminals require pressing it twice.
-make start-all
-```
-
-Set `WAVS_ENV_PINATA_API_KEY` and `IPFS_GATEWAY_URL` in your `.env` file.
-
-### Run the demo
+Start an ethereum node (anvil) and the WAVS service.
 
 ```bash
-# Deploy contracts
-make deploy-contracts
-
-# Deploy the service
-make deploy-service
-
-# Trigger the service
-make trigger-service
-
-# Wait for the component to execute
-echo "waiting 3 seconds for the component to execute..."
-sleep 3
-
-# Claim the rewards
-make claim
+make start
 ```
+
+### Deploy contracts and service
+
+In another terminal, deploy the contracts and service to the chain and WAVS.
+
+```bash
+make deploy
+```
+
+### Trigger the AVS
+
+Run the AVS service to query the NFTs minted during the deploy step, upload the merkle tree to IPFS, and update the merkle root in the reward distributor contract.
+
+```bash
+make update-rewards
+```
+
+### Claim rewards
+
+Claim rewards by querying the merkle tree data from IPFS and submitting the
+Merkle proof.
+
+```bash
+make claim-rewards
+```
+
+Notice how the local wallet's balance has increased by the amount of rewards
+claimed.
 
 ## Frontend
 
@@ -209,14 +214,10 @@ The frontend must be started after the backend is running and the contracts are 
 
 ```bash
 # In a terminal, start the backend
-make start-all
+make start
 
-# In another terminal, deploy the necessary contracts and service and do a test run.
-make deploy-contracts
-make deploy-service
-make trigger-service
-sleep 3
-make claim
+# In another terminal, deploy the necessary contracts and service.
+make deploy
 
 # Then install frontend dependencies
 cd frontend

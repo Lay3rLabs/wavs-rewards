@@ -3,42 +3,37 @@
 # Check if user is in docker group to determine if sudo is needed
 SUDO := $(shell if groups | grep -q docker; then echo ''; else echo 'sudo'; fi)
 
-# Default target is build
-default: build
-
-# Customize these variables
-COMPONENT_FILENAME ?= rewards.wasm
-TRIGGER_EVENT ?= WavsRewardsTrigger(uint64,address,address)
-SERVICE_CONFIG ?= '{"fuel_limit":100000000,"max_gas":5000000,"host_envs":["WAVS_ENV_REWARD_TOKEN_ADDRESS","WAVS_ENV_REWARD_SOURCE_NFT_ADDRESS","WAVS_ENV_PINATA_API_URL","WAVS_ENV_PINATA_API_KEY"],"kv":[],"workflow_id":"default","component_id":"default"}'
-
-# Define common variables
-CARGO?=cargo
-WAVS_CMD ?= $(SUDO) docker run --rm --network host $$(test -f .env && echo "--env-file ./.env") -v $$(pwd):/data ghcr.io/lay3rlabs/wavs:0.3.0 wavs-cli
-ANVIL_PRIVATE_KEY?=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
-RPC_URL?=http://localhost:8545
-SERVICE_MANAGER_ADDR?=`jq -r '.eigen_service_managers.local | .[-1]' .docker/deployments.json`
+# wavs-rewards custom
 REWARD_DISTRIBUTOR_ADDR?=`jq -r '.reward_distributor' "./.docker/script_deploy.json"`
 REWARD_TOKEN_ADDRESS?=`jq -r '.reward_token' .docker/script_deploy.json`
-REWARD_SOURCE_NFT_ADDRESS?=`jq -r '.reward_source_nft' .docker/script_deploy.json`
+REWARD_NFT_ADDRESS?=`jq -r '.reward_source_nft' .docker/script_deploy.json`
 
-## check-requirements: verify system requirements are installed
-check-requirements: check-node check-jq check-cargo
+# Define common variables
+AGGREGATOR_URL?=http://127.0.0.1:8001
+ANVIL_PRIVATE_KEY?=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+CARGO=cargo
+COMPONENT_FILENAME?=rewards.wasm
+CREDENTIAL?=""
+DOCKER_IMAGE?=ghcr.io/lay3rlabs/wavs:0.4.0-beta.2
+MIDDLEWARE_DOCKER_IMAGE?=ghcr.io/lay3rlabs/wavs-middleware:0.4.0-beta.2
+IPFS_ENDPOINT?=http://127.0.0.1:5001
+RPC_URL?=http://127.0.0.1:8545
+SERVICE_FILE?=.docker/service.json
+SERVICE_MANAGER_ADDR?=`jq -r .addresses.WavsServiceManager .nodes/avs_deploy.json`
+WASI_BUILD_DIR ?= ""
+WAVS_CMD ?= $(SUDO) docker run --rm --network host $$(test -f .env && echo "--env-file ./.env") -v $$(pwd):/data ${DOCKER_IMAGE} wavs-cli
+WAVS_ENDPOINT?="http://127.0.0.1:8000"
+ENV_FILE?=.env
+
+# Default target is build
+default: build
 
 ## build: building the project
 build: _build_forge wasi-build
 
-## wasi-build: building the WAVS wasi component(s)
+## wasi-build: building WAVS wasi components | WASI_BUILD_DIR
 wasi-build:
-	@for component in $(shell ls ./components); do \
-		echo "Building component: $$component"; \
-		(cd components/$$component; cargo component build --release; cargo fmt); \
-	done
-	@mkdir -p ./compiled
-	@cp ./target/wasm32-wasip1/release/*.wasm ./compiled/
-
-## update-submodules: update the git submodules
-update-submodules:
-	@git submodule update --init --recursive
+	@./script/build_components.sh $(WASI_BUILD_DIR)
 
 ## clean: cleaning the project files
 clean: clean-docker
@@ -50,7 +45,7 @@ clean: clean-docker
 
 ## clean-docker: remove unused docker containers
 clean-docker:
-	@$(SUDO) docker rm -v $(shell $(SUDO) docker ps --filter status=exited -q) || true
+	@$(SUDO) docker rm -v $(shell $(SUDO) docker ps -a --filter status=exited -q) 2> /dev/null || true
 
 ## fmt: formatting solidity and rust code
 fmt:
@@ -66,46 +61,70 @@ setup: check-requirements
 	@forge install
 	@npm install
 
+## start: run start script
+start:
+	@bash ./script/start.sh
+
+## deploy: run deploy script
+deploy:
+	@bash ./script/deploy.sh
+
 ## start-all: starting anvil and WAVS with docker compose
-# running anvil out of compose is a temp work around for MacOS
 start-all: clean-docker setup-env
-	@rm --interactive=never .docker/*.json || true
-	@bash -ec 'anvil & anvil_pid=$$!; trap "kill -9 $$anvil_pid 2>/dev/null" EXIT; $(SUDO) docker compose up; wait'
+	@bash ./script/start_all.sh
 
 ## deploy-contracts: deploying the contracts | SERVICE_MANAGER_ADDR, RPC_URL
 deploy-contracts:
 	@forge script ./script/Deploy.s.sol ${SERVICE_MANAGER_ADDR} --sig "run(string)" --rpc-url $(RPC_URL) --broadcast
 
-get-eigen-service-manager-from-deploy:
-	@jq -r '.eigen_service_managers.local | .[-1]' .docker/deployments.json
+## build-service: building the service JSON
+build-service:
+	@bash ./script/build_service.sh
 
-## get-distributor-from-deploy: getting the distributor address from the script deploy
-get-distributor-from-deploy:
-	@jq -r '.reward_distributor' "./.docker/script_deploy.json"
+## update-rewards: updating the rewards | REWARD_DISTRIBUTOR_ADDR, RPC_URL
+update-rewards:
+	@forge script ./script/UpdateRewards.s.sol ${REWARD_DISTRIBUTOR_ADDR} --sig "run(string)" --rpc-url $(RPC_URL) --broadcast -v 4
+
+## claim-rewards: claiming the rewards | REWARD_DISTRIBUTOR_ADDR, REWARD_TOKEN_ADDRESS, RPC_URL
+claim-rewards:
+	@forge script ./script/ClaimRewards.s.sol ${REWARD_DISTRIBUTOR_ADDR} ${REWARD_TOKEN_ADDRESS} --sig "run(string,string)" --rpc-url $(RPC_URL) --broadcast -v 4
 
 ## wavs-cli: running wavs-cli in docker
 wavs-cli:
 	@$(WAVS_CMD) $(filter-out $@,$(MAKECMDGOALS))
 
-## deploy-service: deploying the WAVS component service | COMPONENT_FILENAME, TRIGGER_EVENT, REWARD_DISTRIBUTOR_ADDR, SERVICE_CONFIG
+## upload-component: uploading the WAVS component | COMPONENT_FILENAME, WAVS_ENDPOINT
+upload-component:
+# TODO: move to `$(WAVS_CMD) upload-component ./compiled/${COMPONENT_FILENAME} --wavs-endpoint ${WAVS_ENDPOINT}`
+	@wget --post-file=./compiled/${COMPONENT_FILENAME} --header="Content-Type: application/wasm" -O - ${WAVS_ENDPOINT}/upload | jq -r .digest
+
+SERVICE_URL?="http://127.0.0.1:8080/ipfs/service.json"
+## deploy-service: deploying the WAVS component service json | SERVICE_URL, CREDENTIAL, WAVS_ENDPOINT
 deploy-service:
-	@$(WAVS_CMD) deploy-service --log-level=info --data /data/.docker --home /data \
-	--component "/data/compiled/${COMPONENT_FILENAME}" \
-	--trigger-event-name "${TRIGGER_EVENT}" \
-	--trigger-address "${REWARD_DISTRIBUTOR_ADDR}" \
-	--submit-address "${REWARD_DISTRIBUTOR_ADDR}" \
-	--service-config ${SERVICE_CONFIG}
+	@$(WAVS_CMD) deploy-service --service-url "$(SERVICE_URL)" --log-level=info --data /data/.docker --home /data $(if $(WAVS_ENDPOINT),--wavs-endpoint $(WAVS_ENDPOINT),) $(if $(CREDENTIAL),--evm-credential $(CREDENTIAL),)
 
-## trigger-service: triggering the service | REWARD_DISTRIBUTOR_ADDR, REWARD_TOKEN_ADDRESS, REWARD_SOURCE_NFT_ADDRESS, RPC_URL
-trigger-service:
-	@forge script ./script/Trigger.s.sol ${REWARD_DISTRIBUTOR_ADDR} ${REWARD_TOKEN_ADDRESS} ${REWARD_SOURCE_NFT_ADDRESS} --sig "run(string,string,string)" --rpc-url $(RPC_URL) --broadcast -v 4
+## upload-to-ipfs: uploading the service config to IPFS | IPFS_ENDPOINT, SERVICE_FILE
+upload-to-ipfs:
+	@curl -s -X POST "${IPFS_ENDPOINT}/api/v0/add?pin=true" \
+		-H "Content-Type: multipart/form-data" \
+		-F file=@${SERVICE_FILE} | jq -r .Hash
 
-## claim: claiming the rewards | REWARD_DISTRIBUTOR_ADDR, REWARD_TOKEN_ADDRESS, RPC_URL
-claim:
-	@forge script ./script/Claim.s.sol ${REWARD_DISTRIBUTOR_ADDR} ${REWARD_TOKEN_ADDRESS} --sig "run(string,string)" --rpc-url $(RPC_URL) --broadcast -v 4
+## operator-list: listing the AVS operators | ENV_FILE
+operator-list:
+	@docker run --rm --network host --env-file ${ENV_FILE} -v ./.nodes:/root/.nodes --entrypoint /wavs/list_operator.sh ${MIDDLEWARE_DOCKER_IMAGE}
 
-_build_forge:
-	@forge build
+AVS_PRIVATE_KEY?=""
+## operator-register: listing the AVS operators | ENV_FILE, AVS_PRIVATE_KEY
+operator-register:
+	@if [ -z "${AVS_PRIVATE_KEY}" ]; then \
+		echo "Error: AVS_PRIVATE_KEY is not set. Please set it to your AVS private key."; \
+		exit 1; \
+	fi
+	@docker run --rm --network host --env-file ${ENV_FILE} -v ./.nodes:/root/.nodes --entrypoint /wavs/register.sh ${MIDDLEWARE_DOCKER_IMAGE} "${AVS_PRIVATE_KEY}"
+
+## update-submodules: update the git submodules
+update-submodules:
+	@git submodule update --init --recursive
 
 # Declare phony targets
 .PHONY: build clean fmt bindings test
@@ -119,6 +138,8 @@ help: Makefile
 	@echo
 
 # helpers
+_build_forge:
+	@forge build
 
 .PHONY: setup-env
 setup-env:
@@ -130,7 +151,16 @@ setup-env:
 		fi; \
 	fi
 
+pull-image:
+	@if ! docker image inspect ${DOCKER_IMAGE} &>/dev/null; then \
+		echo "Image ${DOCKER_IMAGE} not found. Pulling..."; \
+		$(SUDO) docker pull ${DOCKER_IMAGE}; \
+	fi
+
 # check versions
+
+## check-requirements: verify system requirements are installed
+check-requirements: check-node check-jq check-cargo
 
 check-command:
 	@command -v $(1) > /dev/null 2>&1 || (echo "Command $(1) not found. Please install $(1), reference the System Requirements section"; exit 1)

@@ -1,17 +1,19 @@
 use crate::{
-    bindings::wavs::worker::layer_types::{TriggerData, TriggerDataEthContractEvent},
+    bindings::wavs::worker::layer_types::{
+        TriggerData, TriggerDataCron, TriggerDataEvmContractEvent,
+    },
     solidity,
 };
 use alloy_sol_types::SolValue;
 use anyhow::Result;
-use wavs_wasi_chain::decode_event_log_data;
+use wavs_wasi_utils::decode_event_log_data;
 
-pub fn decode_trigger_event(trigger_data: TriggerData) -> Result<(u64, String, String)> {
+pub fn decode_trigger_event(trigger_data: TriggerData) -> Result<u64> {
     match trigger_data {
-        TriggerData::EthContractEvent(TriggerDataEthContractEvent { log, .. }) => {
-            let solidity::WavsRewardsTrigger { triggerId, rewardTokenAddr, rewardSourceNftAddr } =
-                decode_event_log_data!(log)?;
-            Ok((triggerId, rewardTokenAddr.to_string(), rewardSourceNftAddr.to_string()))
+        TriggerData::Cron(TriggerDataCron { trigger_time }) => Ok(trigger_time.nanos),
+        TriggerData::EvmContractEvent(TriggerDataEvmContractEvent { log, .. }) => {
+            let solidity::WavsRewardsTrigger { triggerId } = decode_event_log_data!(log)?;
+            Ok(triggerId)
         }
         _ => Err(anyhow::anyhow!("Unsupported trigger data type")),
     }

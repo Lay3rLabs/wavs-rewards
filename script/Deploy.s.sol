@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.22;
 
 import {stdJson} from "forge-std/StdJson.sol";
 
@@ -9,8 +9,8 @@ import {IWavsServiceManager} from "@wavs/interfaces/IWavsServiceManager.sol";
 import {Common} from "script/Common.s.sol";
 
 import {RewardDistributor} from "contracts/RewardDistributor.sol";
-import {RewardSourceERC721} from "contracts/RewardSourceERC721.sol";
-import {RewardERC20} from "contracts/RewardERC20.sol";
+import {RewardToken} from "contracts/RewardToken.sol";
+import {RewardSourceNft} from "contracts/RewardSourceNft.sol";
 
 /// @dev Deployment script for RewardDistributor contract
 contract DeployScript is Common {
@@ -22,43 +22,46 @@ contract DeployScript is Common {
 
     /**
      * @dev Deploys the RewardDistributor contract and writes the results to a JSON file
-     * @param rewardDistributorAddr The address of the reward distributor
+     * @param serviceManagerAddr The address of the service manager
      */
-    function run(string calldata rewardDistributorAddr) public {
+    function run(string calldata serviceManagerAddr) public {
+        address serviceManager = vm.parseAddress(serviceManagerAddr);
+
         vm.startBroadcast(_privateKey);
 
         // Create the distributor which handles WAVS stuff.
         RewardDistributor rewardDistributor = new RewardDistributor(
-            IWavsServiceManager(vm.parseAddress(rewardDistributorAddr))
+            IWavsServiceManager(serviceManager)
         );
 
         // Mint reward tokens for the distributor.
-        RewardERC20 rewardERC20 = new RewardERC20();
-        rewardERC20.mint(address(rewardDistributor), 1000e18);
+        RewardToken rewardToken = new RewardToken();
+        rewardToken.mint{value: 1000 ether}(address(rewardDistributor));
 
-        // Create NFT that is used as source of rewards calculation.
-        RewardSourceERC721 rewardSourceERC721 = new RewardSourceERC721();
+        // Deploy the NFT contract
+        RewardSourceNft nft = new RewardSourceNft();
         // Mint 3 NFTs to the deployer.
         address deployer = vm.addr(_privateKey);
-        rewardSourceERC721.mint(deployer, 1);
-        rewardSourceERC721.mint(deployer, 2);
-        rewardSourceERC721.mint(deployer, 3);
+        nft.mint(deployer, 1);
+        nft.mint(deployer, 2);
+        nft.mint(deployer, 3);
 
         vm.stopBroadcast();
 
         string memory _json = "json";
         _json.serialize(
             "reward_distributor",
-            Strings.toHexString(address(rewardDistributor))
+            Strings.toChecksumHexString(address(rewardDistributor))
         );
         _json.serialize(
             "reward_token",
-            Strings.toHexString(address(rewardERC20))
+            Strings.toChecksumHexString(address(rewardToken))
         );
-        string memory _finalJson = _json.serialize(
+        string memory finalJson = _json.serialize(
             "reward_source_nft",
-            Strings.toHexString(address(rewardSourceERC721))
+            Strings.toChecksumHexString(address(nft))
         );
-        vm.writeFile(script_output_path, _finalJson);
+
+        vm.writeFile(script_output_path, finalJson);
     }
 }
