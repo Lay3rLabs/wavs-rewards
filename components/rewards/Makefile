@@ -1,5 +1,6 @@
 OUTPUT_DIR?=../../compiled
 
+
 ## wasi-build: building the WAVS wasi component(s)
 wasi-build:
 	@echo "Building component: rewards"

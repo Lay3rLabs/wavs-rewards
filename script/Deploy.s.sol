@@ -18,7 +18,7 @@ contract DeployScript is Common {
 
     string public root = vm.projectRoot();
     string public script_output_path =
-        string.concat(root, "/.docker/script_deploy.json");
+        string.concat(root, "/.docker/rewards_deploy.json");
 
     /**
      * @dev Deploys the RewardDistributor contract and writes the results to a JSON file
