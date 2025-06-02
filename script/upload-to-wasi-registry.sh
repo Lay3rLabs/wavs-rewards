@@ -1,8 +1,14 @@
 #!/bin/bash
 
+export REGISTRY=`bash ./script/get-registry.sh`
 if [ -z "$REGISTRY" ]; then
     echo "REGISTRY is not set. Please set the REGISTRY environment variable." && exit 1
 fi
+export PKG_NAMESPACE=`bash ./script/get-wasi-namespace.sh`
+if [ -z "$PKG_NAMESPACE" ]; then
+    echo "PKG_NAMESPACE is not set. Please set the PKG_NAMESPACE environment variable." && exit 1
+fi
+
 if [ -z "$PKG_NAME" ]; then
     echo "PKG_NAME is not set. Please set the PKG_NAME environment variable." && exit 1
 fi
@@ -11,9 +17,6 @@ if [ -z "$PKG_VERSION" ]; then
 fi
 if [ -z "$COMPONENT_FILENAME" ]; then
     echo "COMPONENT_FILENAME is not set. Please set the COMPONENT_FILENAME environment variable." && exit 1
-fi
-if [ -z "$PKG_NAMESPACE" ]; then
-    echo "PKG_NAMESPACE is not set. Please set the PKG_NAMESPACE environment variable." && exit 1
 fi
 
 # ===
@@ -37,11 +40,7 @@ if [[ $exit_code -ne 0 ]]; then
     elif [[ "$output" =~ "error sending request for url" ]]; then
         echo "NOTE: Check to make sure you are running the registry locally"
         echo "${output}"
-        exit 1
     else
         echo "Unknown error occurred ${output}"
-        exit 1
     fi
 fi
-
-exit 0

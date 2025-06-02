@@ -39,12 +39,12 @@ REWARDS_CONFIG="reward_token=${REWARD_TOKEN_ADDR},reward_source_nft=${REWARD_SOU
 
 BASE_CMD="docker run --rm --network host -w /data -v $(pwd):/data ghcr.io/lay3rlabs/wavs:0.4.0-rc wavs-cli service --json true --home /data --file /data/${FILE_LOCATION}"
 
-if [ -z "$SERVICE_MANAGER_ADDRESS" ]; then
+if [ -z "$WAVS_SERVICE_MANAGER_ADDRESS" ]; then
     # DevEx: attempt to grab it from the location if not set already
-    export SERVICE_MANAGER_ADDRESS=$(jq -r .addresses.WavsServiceManager ./.nodes/avs_deploy.json)
+    export WAVS_SERVICE_MANAGER_ADDRESS=$(jq -r .addresses.WavsServiceManager ./.nodes/avs_deploy.json)
 
-    if [ -z "$SERVICE_MANAGER_ADDRESS" ]; then
-        echo "SERVICE_MANAGER_ADDRESS is not set. Please set it to the address of the service manager."
+    if [ -z "$WAVS_SERVICE_MANAGER_ADDRESS" ]; then
+        echo "WAVS_SERVICE_MANAGER_ADDRESS is not set. Please set it to the address of the service manager."
         exit 1
     fi
 fi
@@ -101,7 +101,7 @@ function new_workflow() {
 new_workflow ${REWARD_DISTRIBUTOR_ADDR} ${REWARD_DISTRIBUTOR_ADDR} "event" ${REWARDS_TRIGGER_EVENT} ${REWARDS_ENV_VARS} ${REWARDS_CONFIG}
 new_workflow ${REWARD_DISTRIBUTOR_ADDR} ${REWARD_DISTRIBUTOR_ADDR} "cron" "${REWARDS_CRON_SCHEDULE}" ${REWARDS_ENV_VARS} ${REWARDS_CONFIG}
 
-$BASE_CMD manager set-evm --chain-name ${SUBMIT_CHAIN} --address `cast --to-checksum ${SERVICE_MANAGER_ADDRESS}` > /dev/null
+$BASE_CMD manager set-evm --chain-name ${SUBMIT_CHAIN} --address `cast --to-checksum ${WAVS_SERVICE_MANAGER_ADDRESS}` > /dev/null
 $BASE_CMD validate > /dev/null
 
 echo "Configuration file created ${FILE_LOCATION}. Watching events from '${TRIGGER_CHAIN}' & submitting to '${SUBMIT_CHAIN}'."

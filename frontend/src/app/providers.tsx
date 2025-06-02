@@ -9,12 +9,12 @@ import {
   connectorsForWallets,
   darkTheme
 } from '@rainbow-me/rainbowkit';
-import { Chain, sepolia } from 'wagmi/chains';
+import { Chain } from 'wagmi/chains';
 import { getRpcUrl, getNetworkName, getWalletConnectProjectId } from '@/utils/environmentConfig';
 
 // Define localhost chain
 const localhost: Chain = {
-  id: 31337,
+  id: 17_000,
   name: getNetworkName(),
   nativeCurrency: {
     decimals: 18,
@@ -31,10 +31,10 @@ const localhost: Chain = {
 };
 
 // Setup chains
-const chains: readonly [Chain, ...Chain[]] = [localhost, sepolia];
+const chains: readonly [Chain, ...Chain[]] = [localhost];
 
 // Create the connectors
-const { wallets} = getDefaultWallets();
+const { wallets } = getDefaultWallets();
 const connectors = connectorsForWallets([...wallets], {
   appName: 'WAVS Rewards',
   projectId: getWalletConnectProjectId(),
@@ -46,7 +46,7 @@ export const config = createConfig({
   connectors,
   transports: {
     [localhost.id]: http(getRpcUrl()),
-    [sepolia.id]: http(),
+    // [holesky.id]: http(),
   },
 });
 

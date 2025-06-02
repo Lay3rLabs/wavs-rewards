@@ -9,7 +9,8 @@ CREDENTIAL?=""
 DOCKER_IMAGE?=ghcr.io/lay3rlabs/wavs:0.4.0-rc
 MIDDLEWARE_DOCKER_IMAGE?=ghcr.io/lay3rlabs/wavs-middleware:5ebc489
 IPFS_ENDPOINT?=http://127.0.0.1:5001
-RPC_URL?=http://127.0.0.1:8545
+RPC_URL?=`bash ./script/get-rpc.sh`
+DEPLOYER_PK=`cat .nodes/deployer`
 SERVICE_FILE?=.docker/service.json
 SERVICE_SUBMISSION_ADDR?=`jq -r .deployedTo .docker/submit.json`
 SERVICE_TRIGGER_ADDR?=`jq -r .deployedTo .docker/trigger.json`
@@ -21,22 +22,22 @@ WAVS_ENDPOINT?="http://127.0.0.1:8000"
 
 # wavs-rewards custom
 COMPONENT_FILENAME?=rewards.wasm
-REWARD_DISTRIBUTOR_ADDR?=`jq -r '.reward_distributor' .docker/rewards_deploy.json`
+REWARD_DISTRIBUTOR_ADDRESS?=`jq -r '.reward_distributor' .docker/rewards_deploy.json`
 REWARD_TOKEN_ADDRESS?=`jq -r '.reward_token' .docker/rewards_deploy.json`
 REWARD_NFT_ADDRESS?=`jq -r '.reward_source_nft' .docker/rewards_deploy.json`
-SERVICE_MANAGER_ADDR?=`jq -r .addresses.WavsServiceManager .nodes/avs_deploy.json`
+WAVS_SERVICE_MANAGER_ADDRESS?=`jq -r .addresses.WavsServiceManager .nodes/avs_deploy.json`
 
-## deploy-contracts: deploying the contracts | SERVICE_MANAGER_ADDR, RPC_URL
+## deploy-contracts: deploying the contracts | WAVS_SERVICE_MANAGER_ADDRESS, RPC_URL
 deploy-contracts:
-	@forge script ./script/Deploy.s.sol ${SERVICE_MANAGER_ADDR} --sig "run(string)" --rpc-url $(RPC_URL) --broadcast
+	@forge script ./script/Deploy.s.sol ${WAVS_SERVICE_MANAGER_ADDRESS} --sig "run(string)" --rpc-url $(RPC_URL) --private-key "${DEPLOYER_PK}" --broadcast
 
-## update-rewards: updating the rewards | REWARD_DISTRIBUTOR_ADDR, RPC_URL
+## update-rewards: updating the rewards | REWARD_DISTRIBUTOR_ADDRESS, RPC_URL
 update-rewards:
-	@forge script ./script/UpdateRewards.s.sol ${REWARD_DISTRIBUTOR_ADDR} --sig "run(string)" --rpc-url $(RPC_URL) --broadcast -v 4
+	@forge script ./script/UpdateRewards.s.sol ${REWARD_DISTRIBUTOR_ADDRESS} --sig "run(string)" --rpc-url ${RPC_URL} --broadcast -v 4
 
-## claim-rewards: claiming the rewards | REWARD_DISTRIBUTOR_ADDR, REWARD_TOKEN_ADDRESS, RPC_URL
+## claim-rewards: claiming the rewards | REWARD_DISTRIBUTOR_ADDRESS, REWARD_TOKEN_ADDRESS, RPC_URL
 claim-rewards:
-	@forge script ./script/ClaimRewards.s.sol ${REWARD_DISTRIBUTOR_ADDR} ${REWARD_TOKEN_ADDRESS} --sig "run(string,string)" --rpc-url $(RPC_URL) --broadcast -v 4
+	@forge script ./script/ClaimRewards.s.sol ${REWARD_DISTRIBUTOR_ADDRESS} ${REWARD_TOKEN_ADDRESS} --sig "run(string,string)" --rpc-url ${RPC_URL} --broadcast -v 4
 
 # Default target is build
 default: build
@@ -147,7 +148,7 @@ COMMAND?=""
 PAST_BLOCKS?=500
 wavs-middleware:
 	@docker run --rm --network host --env-file ${ENV_FILE} \
-		$(if ${SERVICE_MANAGER_ADDRESS},-e WAVS_SERVICE_MANAGER_ADDRESS=${SERVICE_MANAGER_ADDRESS}) \
+		$(if ${WAVS_SERVICE_MANAGER_ADDRESS},-e WAVS_SERVICE_MANAGER_ADDRESS=${WAVS_SERVICE_MANAGER_ADDRESS}) \
 		$(if ${PAST_BLOCKS},-e PAST_BLOCKS=${PAST_BLOCKS}) \
 		-v ./.nodes:/root/.nodes ${MIDDLEWARE_DOCKER_IMAGE} ${COMMAND}
 
